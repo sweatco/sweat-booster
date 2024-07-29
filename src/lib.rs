@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use near_contract_standards::non_fungible_token::{NonFungibleToken, NonFungibleTokenEnumeration, NonFungibleTokenResolver, Token, TokenId};
+use near_contract_standards::non_fungible_token::{NonFungibleToken, NonFungibleTokenApproval, NonFungibleTokenEnumeration, NonFungibleTokenResolver, Token, TokenId};
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata};
 use near_sdk::{AccountId, BorshStorageKey, env, ext_contract, Gas, near, NearToken, PanicOnDefault, Promise, PromiseError, PromiseOrValue, require, serde_json};
@@ -155,6 +155,9 @@ impl Contract {
 
     pub fn redeem(&mut self, token_id: TokenId) -> PromiseOrValue<U128> {
         let account_id = env::predecessor_account_id();
+
+        require!(self.tokens.owner_by_id.get(&token_id).expect("Token not found") == account_id, "Account doesnt own the token");
+
         let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
 
         let mut metadata = token.metadata.expect("Token doesn't contain metadata");
@@ -177,6 +180,16 @@ impl Contract {
                 .with_static_gas(Gas::from_tgas(10))
                 .on_redeem_transfer(token_id)
         ).into()
+    }
+
+    pub fn nft_burn(&mut self, token_id: TokenId) {
+        self.assert_oracle();
+
+        self.nft_burn_internal(token_id);
+    }
+
+    fn nft_burn_internal(&mut self, token_id: TokenId) {
+        self.tokens.burn(token_id);
     }
 }
 
@@ -229,7 +242,7 @@ trait Callbacks {
 impl Callbacks for Contract {
     #[private]
     fn on_redeem_transfer(&mut self, #[callback_result] result: Result<(), PromiseError>, token_id: TokenId) -> PromiseOrValue<U128> {
-        if let Ok(_) = result {
+        if result.is_ok() {
             let metadata = self.tokens.token_metadata_by_id
                 .as_mut()
                 .and_then(|by_id| by_id.remove(&token_id)).unwrap();
@@ -252,5 +265,26 @@ impl Callbacks for Contract {
         self.tokens.token_metadata_by_id.as_mut().unwrap().insert(&token_id, &metadata);
 
         PromiseOrValue::Value(0.into())
+    }
+}
+
+trait NonFungibleTokenBurn {
+    fn burn(&mut self, token_id: TokenId);
+}
+
+impl NonFungibleTokenBurn for NonFungibleToken {
+    fn burn(&mut self, token_id: TokenId) {
+        let owner_id = self.owner_by_id.remove(&token_id).expect("Owner not found");
+
+        if let Some(approvals_by_id) = &mut self.approvals_by_id {
+            approvals_by_id.remove(&token_id);
+        }
+        if let Some(tokens_per_owner) = &mut self.tokens_per_owner {
+            let mut u = tokens_per_owner.remove(&owner_id).unwrap();
+            u.remove(&token_id);
+        }
+        if let Some(token_metadata_by_id) = &mut self.token_metadata_by_id {
+            token_metadata_by_id.remove(&token_id);
+        }
     }
 }
