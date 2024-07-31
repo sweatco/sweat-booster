@@ -5900,6 +5900,7 @@ dependencies = [
  "near-sdk",
  "near-workspaces 0.11.0",
  "serde_json",
+ "sweat-booster-model",
  "tokio",
 ]
 
@@ -5907,6 +5908,7 @@ dependencies = [
 name = "sweat-booster-model"
 version = "2.1.0"
 dependencies = [
+ "near-contract-standards",
  "near-sdk",
  "near-workspaces 0.11.0",
  "nitka",

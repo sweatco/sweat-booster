@@ -1,5 +1,3 @@
-mod util;
-
 use std::collections::HashMap;
 
 use near_contract_standards::non_fungible_token::{NonFungibleToken, NonFungibleTokenApproval, NonFungibleTokenEnumeration, NonFungibleTokenResolver, Token, TokenId};
@@ -9,6 +7,10 @@ use near_sdk::{AccountId, BorshStorageKey, env, ext_contract, Gas, near, NearTok
 use near_sdk::collections::LazyOption;
 use near_sdk::json_types::{Base64VecU8, U128};
 use serde_json::json;
+
+use sweat_booster_model::api::{AuthApi, BoosterType, BurnApi, MintApi, RedeemApi};
+
+mod util;
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
@@ -71,6 +73,75 @@ impl NonFungibleTokenCore for Contract {
 }
 
 #[near]
+impl AuthApi for Contract {
+    #[private]
+    fn add_oracle(&mut self, account_id: AccountId) {
+        self.oracles.push(account_id);
+    }
+}
+
+#[near]
+impl MintApi for Contract {
+    fn mint(&mut self, receiver_id: AccountId, booster_type: BoosterType) -> Token {
+        self.assert_oracle();
+
+        let metadata = self.to_token(booster_type);
+
+        let result = self.tokens.internal_mint(
+            self.last_id.to_string(),
+            receiver_id,
+            Some(metadata),
+        );
+
+        self.last_id += 1;
+
+        result
+    }
+}
+
+#[near]
+impl RedeemApi for Contract {
+    fn redeem(&mut self, token_id: TokenId) -> PromiseOrValue<U128> {
+        let account_id = env::predecessor_account_id();
+
+        self.assert_owner(&account_id, &token_id);
+
+        let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
+
+        let mut metadata = token.metadata.expect("Token doesn't contain metadata");
+        let extra = metadata.extra.expect("Metadata doesn't contain extra");
+        let mut extra = serde_json::from_str::<BalanceBoosterExtra>(extra.as_str()).expect("Failed to parse extra");
+
+        require!(extra.is_redeemable, "Redeem is in progress");
+
+        extra.is_redeemable = false;
+        let amount = extra.denomination;
+
+        env::log_str(format!("Redeem {} to {}", amount, env::predecessor_account_id()).as_str());
+        env::log_str(format!("Token: {}", token_id.clone()).as_str());
+
+        metadata.extra = Some(serde_json::to_string(&extra).expect("Failed to serialize extra"));
+        self.tokens.token_metadata_by_id.as_mut().unwrap().insert(&token_id, &metadata);
+
+        Promise::new(self.ft_account_id.clone()).ft_transfer(&account_id, amount, None).then(
+            ext_self::ext(env::current_account_id())
+                .with_static_gas(Gas::from_tgas(10))
+                .on_redeem_transfer(token_id)
+        ).into()
+    }
+}
+
+#[near]
+impl BurnApi for Contract {
+    fn burn(&mut self, owner_id: AccountId, token_id: TokenId) {
+        self.assert_oracle();
+        self.assert_owner(&owner_id, &token_id);
+
+        self.tokens.burn(token_id);
+    }
+}
+
+#[near]
 impl Contract {
     #[init]
     pub fn new(ft_account_id: AccountId, base_uri: Option<String>) -> Self {
@@ -103,90 +174,6 @@ impl Contract {
         let mut metadata = self.metadata.get().expect("No metadata found");
         metadata.base_uri = Some(base_uri);
         self.metadata.replace(&metadata);
-    }
-
-    #[payable]
-    pub fn mint_balance_booster(&mut self, receiver_id: AccountId, denomination: U128, media_cid: Option<String>, media_hash: Option<Base64VecU8>) -> Token {
-        self.assert_oracle();
-
-        let issued_at = env::block_timestamp_ms();
-
-        let denomination_quot = denomination.0 / u128::pow(10, 18);
-        let denomination_rem = denomination.0 % u128::pow(10, 18);
-        let metadata = TokenMetadata {
-            title: Some(format!("Voucher #{}", self.last_id)),
-            description: Some(format!("{denomination_quot}.{denomination_rem} $SWEAT voucher").to_string()),
-            media: media_cid,
-            media_hash,
-            copies: Some(1),
-            issued_at: Some(issued_at.to_string()),
-            expires_at: None,
-            starts_at: None,
-            updated_at: None,
-            extra: Some(
-                serde_json::to_string(&BalanceBoosterExtra {
-                    denomination: denomination.0,
-                    is_redeemable: true,
-                }).unwrap()
-            ),
-            reference: None,
-            reference_hash: None,
-        };
-
-        let result = self.tokens.internal_mint(
-            self.last_id.to_string(),
-            receiver_id,
-            Some(metadata),
-        );
-
-        self.last_id += 1;
-
-        result
-    }
-
-    #[private]
-    pub fn add_oracle(&mut self, account_id: AccountId) {
-        self.oracles.push(account_id);
-    }
-
-    pub fn redeem(&mut self, token_id: TokenId) -> PromiseOrValue<U128> {
-        let account_id = env::predecessor_account_id();
-
-        self.assert_owner(&account_id, &token_id);
-        
-        let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
-
-        let mut metadata = token.metadata.expect("Token doesn't contain metadata");
-        let extra = metadata.extra.expect("Metadata doesn't contain extra");
-        let mut extra = serde_json::from_str::<BalanceBoosterExtra>(extra.as_str()).expect("Failed to parse extra");
-
-        require!(extra.is_redeemable, "Redeem is in progress");
-
-        extra.is_redeemable = false;
-        let amount = extra.denomination;
-
-        env::log_str(format!("Redeem {} to {}", amount, env::predecessor_account_id()).as_str());
-        env::log_str(format!("Token: {}", token_id.clone()).as_str());
-
-        metadata.extra = Some(serde_json::to_string(&extra).expect("Failed to serialize extra"));
-        self.tokens.token_metadata_by_id.as_mut().unwrap().insert(&token_id, &metadata);
-
-        Promise::new(self.ft_account_id.clone()).ft_transfer(&account_id, amount, None).then(
-            ext_self::ext(env::current_account_id())
-                .with_static_gas(Gas::from_tgas(10))
-                .on_redeem_transfer(token_id)
-        ).into()
-    }
-
-    pub fn nft_burn(&mut self, owner_id: AccountId, token_id: TokenId) {
-        self.assert_oracle();
-        self.assert_owner(&owner_id, &token_id);
-
-        self.nft_burn_internal(token_id);
-    }
-
-    fn nft_burn_internal(&mut self, token_id: TokenId) {
-        self.tokens.burn(token_id);
     }
 }
 
@@ -282,6 +269,36 @@ impl NonFungibleTokenBurn for NonFungibleToken {
         }
         if let Some(token_metadata_by_id) = &mut self.token_metadata_by_id {
             token_metadata_by_id.remove(&token_id);
+        }
+    }
+}
+
+impl Contract {
+    fn to_token(&self, booster_type: BoosterType) -> TokenMetadata {
+        let BoosterType::BalanceBooster(data) = booster_type;
+
+        let issued_at = env::block_timestamp_ms();
+        let denomination_quot = data.denomination.0 / u128::pow(10, 18);
+        let denomination_rem = data.denomination.0 % u128::pow(10, 18);
+
+        TokenMetadata {
+            title: Some(format!("Voucher #{}", self.last_id)),
+            description: Some(format!("{denomination_quot}.{denomination_rem} $SWEAT voucher").to_string()),
+            media: Some(data.media_cid),
+            media_hash: Some(data.media_hash),
+            copies: Some(1),
+            issued_at: Some(issued_at.to_string()),
+            expires_at: None,
+            starts_at: None,
+            updated_at: None,
+            extra: Some(
+                serde_json::to_string(&BalanceBoosterExtra {
+                    denomination: data.denomination.0,
+                    is_redeemable: true,
+                }).unwrap()
+            ),
+            reference: None,
+            reference_hash: None,
         }
     }
 }

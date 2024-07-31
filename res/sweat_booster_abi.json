@@ -7,7 +7,7 @@
       "compiler": "rustc 1.80.0",
       "builder": "cargo-near 0.6.2"
     },
-    "wasm_hash": "BqNuBc6cVFD9MAhNcdJdNbT4UnfBGyyyEE4qA49wrteE"
+    "wasm_hash": "FucG1HKM6PyBw5bnFjsYE37PB6fvMVdtqfCyBUyN5ZBa"
   },
   "body": {
     "functions": [
@@ -30,15 +30,33 @@
         }
       },
       {
+        "name": "burn",
+        "kind": "call",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "owner_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "token_id",
+              "type_schema": {
+                "type": "string"
+              }
+            }
+          ]
+        }
+      },
+      {
         "name": "contract_source_metadata",
         "kind": "view"
       },
       {
-        "name": "mint_balance_booster",
+        "name": "mint",
         "kind": "call",
-        "modifiers": [
-          "payable"
-        ],
         "params": {
           "serialization_type": "json",
           "args": [
@@ -49,31 +67,9 @@
               }
             },
             {
-              "name": "denomination",
+              "name": "booster_type",
               "type_schema": {
-                "type": "string"
-              }
-            },
-            {
-              "name": "media_cid",
-              "type_schema": {
-                "type": [
-                  "string",
-                  "null"
-                ]
-              }
-            },
-            {
-              "name": "media_hash",
-              "type_schema": {
-                "anyOf": [
-                  {
-                    "$ref": "#/definitions/Base64VecU8"
-                  },
-                  {
-                    "type": "null"
-                  }
-                ]
+                "$ref": "#/definitions/BoosterType"
               }
             }
           ]
@@ -107,27 +103,6 @@
                   "string",
                   "null"
                 ]
-              }
-            }
-          ]
-        }
-      },
-      {
-        "name": "nft_burn",
-        "kind": "call",
-        "params": {
-          "serialization_type": "json",
-          "args": [
-            {
-              "name": "owner_id",
-              "type_schema": {
-                "$ref": "#/definitions/AccountId"
-              }
-            },
-            {
-              "name": "token_id",
-              "type_schema": {
-                "type": "string"
               }
             }
           ]
@@ -509,6 +484,25 @@
           "description": "NEAR Account Identifier.\n\nThis is a unique, syntactically valid, human-readable account identifier on the NEAR network.\n\n[See the crate-level docs for information about validation.](index.html#account-id-rules)\n\nAlso see [Error kind precedence](AccountId#error-kind-precedence).\n\n## Examples\n\n``` use near_account_id::AccountId;\n\nlet alice: AccountId = \"alice.near\".parse().unwrap();\n\nassert!(\"ƒelicia.near\".parse::<AccountId>().is_err()); // (ƒ is not f) ```",
           "type": "string"
         },
+        "BalanceBoosterData": {
+          "type": "object",
+          "required": [
+            "denomination",
+            "media_cid",
+            "media_hash"
+          ],
+          "properties": {
+            "denomination": {
+              "type": "string"
+            },
+            "media_cid": {
+              "type": "string"
+            },
+            "media_hash": {
+              "$ref": "#/definitions/Base64VecU8"
+            }
+          }
+        },
         "Base64VecU8": {
           "description": "Helper class to serialize/deserialize `Vec<u8>` to base64 string.",
           "type": "array",
@@ -517,6 +511,22 @@
             "format": "uint8",
             "minimum": 0.0
           }
+        },
+        "BoosterType": {
+          "oneOf": [
+            {
+              "type": "object",
+              "required": [
+                "BalanceBooster"
+              ],
+              "properties": {
+                "BalanceBooster": {
+                  "$ref": "#/definitions/BalanceBoosterData"
+                }
+              },
+              "additionalProperties": false
+            }
+          ]
         },
         "NFTContractMetadata": {
           "description": "Metadata for the NFT contract itself.",
