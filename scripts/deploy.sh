@@ -11,4 +11,4 @@ fi
 
 echo ">> Deploying contract"
 
-near dev-deploy --wasmFile "res/sweat_jar.wasm" --initFunction "init" --initArgs "{\"token_account_id\": \"$TOKEN_ACCOUNT_ID\", \"manager\": \"$ADMIN_ACCOUNT_ID\", \"fee_account_id\": \"$FEE_ACCOUNT_ID\"}"
+near dev-deploy --wasmFile "res/sweat_booster.wasm" --initFunction "init" --initArgs "{\"ft_account_id\": \"$TOKEN_ACCOUNT_ID\"}"
