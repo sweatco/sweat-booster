@@ -1,3 +1,5 @@
+mod util;
+
 use std::collections::HashMap;
 
 use near_contract_standards::non_fungible_token::{NonFungibleToken, NonFungibleTokenApproval, NonFungibleTokenEnumeration, NonFungibleTokenResolver, Token, TokenId};
@@ -142,12 +144,6 @@ impl Contract {
         result
     }
 
-    fn assert_oracle(&self) {
-        if !self.oracles.contains(&env::predecessor_account_id()) {
-            env::panic_str("Only oracle can call this method");
-        }
-    }
-
     #[private]
     pub fn add_oracle(&mut self, account_id: AccountId) {
         self.oracles.push(account_id);
@@ -156,8 +152,8 @@ impl Contract {
     pub fn redeem(&mut self, token_id: TokenId) -> PromiseOrValue<U128> {
         let account_id = env::predecessor_account_id();
 
-        require!(self.tokens.owner_by_id.get(&token_id).expect("Token not found") == account_id, "Account doesnt own the token");
-
+        self.assert_owner(&account_id, &token_id);
+        
         let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
 
         let mut metadata = token.metadata.expect("Token doesn't contain metadata");
@@ -182,8 +178,9 @@ impl Contract {
         ).into()
     }
 
-    pub fn nft_burn(&mut self, token_id: TokenId) {
+    pub fn nft_burn(&mut self, owner_id: AccountId, token_id: TokenId) {
         self.assert_oracle();
+        self.assert_owner(&owner_id, &token_id);
 
         self.nft_burn_internal(token_id);
     }
