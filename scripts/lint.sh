@@ -3,7 +3,7 @@ set -eox pipefail
 
 rustup component add clippy
 
-cargo clippy -p sweat_jar \
+cargo clippy -p sweat_booster \
   -- \
   \
   -W clippy::all \

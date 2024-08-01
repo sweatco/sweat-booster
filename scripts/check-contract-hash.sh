@@ -1,7 +1,7 @@
 #!/bin/bash
 set -eox pipefail
 
-contract_name="sweat_jar"
+contract_name="sweat_booster"
 
 commit="./res/${contract_name}_commit.wasm"
 docker="./res/${contract_name}.wasm"
