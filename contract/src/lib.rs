@@ -4,13 +4,15 @@ use near_contract_standards::non_fungible_token::{NonFungibleToken, NonFungibleT
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata};
 use near_sdk::{AccountId, BorshStorageKey, env, ext_contract, Gas, near, NearToken, PanicOnDefault, Promise, PromiseError, PromiseOrValue, require, serde_json};
-use near_sdk::collections::LazyOption;
+use near_sdk::collections::{LazyOption, UnorderedSet};
 use near_sdk::json_types::{Base64VecU8, U128};
 use serde_json::json;
 
 use sweat_booster_model::api::{AuthApi, BoosterType, BurnApi, MintApi, RedeemApi};
 
 mod util;
+pub mod auth;
+mod common;
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
@@ -19,7 +21,7 @@ pub struct Contract {
     tokens: NonFungibleToken,
     metadata: LazyOption<NFTContractMetadata>,
     last_id: u128,
-    oracles: Vec<AccountId>,
+    oracles: UnorderedSet<AccountId>,
 }
 
 #[near]
@@ -69,14 +71,6 @@ impl NonFungibleTokenCore for Contract {
 
     fn nft_token(&self, token_id: TokenId) -> Option<Token> {
         self.tokens.nft_token(token_id)
-    }
-}
-
-#[near]
-impl AuthApi for Contract {
-    #[private]
-    fn add_oracle(&mut self, account_id: AccountId) {
-        self.oracles.push(account_id);
     }
 }
 
@@ -144,7 +138,7 @@ impl BurnApi for Contract {
 #[near]
 impl Contract {
     #[init]
-    pub fn new(ft_account_id: AccountId, base_uri: Option<String>) -> Self {
+    pub fn new(ft_account_id: AccountId, oracle: AccountId, base_uri: Option<String>) -> Self {
         let contract_metadata = NFTContractMetadata {
             spec: "nft-2.0.0".to_string(),
             name: "Booster".to_string(),
@@ -154,6 +148,8 @@ impl Contract {
             reference: None,
             reference_hash: None,
         };
+        let mut oracles = UnorderedSet::new(StorageKey::Oracles);
+        oracles.insert(&oracle);
 
         Self {
             ft_account_id,
@@ -166,7 +162,7 @@ impl Contract {
             ),
             metadata: LazyOption::new(StorageKey::ContractMetadata, Some(&contract_metadata)),
             last_id: 0,
-            oracles: vec![],
+            oracles,
         }
     }
 
@@ -185,6 +181,7 @@ enum StorageKey {
     Enumeration,
     Approval,
     ContractMetadata,
+    Oracles,
 }
 
 #[near(serializers = [borsh, json])]

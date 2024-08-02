@@ -7,16 +7,13 @@
       "compiler": "rustc 1.80.0",
       "builder": "cargo-near 0.6.2"
     },
-    "wasm_hash": "FucG1HKM6PyBw5bnFjsYE37PB6fvMVdtqfCyBUyN5ZBa"
+    "wasm_hash": "4AqQWYpVFDHA4ug2ZVxpNkTVcB7YrCJG5U9L1AfULZtb"
   },
   "body": {
     "functions": [
       {
         "name": "add_oracle",
         "kind": "call",
-        "modifiers": [
-          "private"
-        ],
         "params": {
           "serialization_type": "json",
           "args": [
@@ -53,6 +50,19 @@
       {
         "name": "contract_source_metadata",
         "kind": "view"
+      },
+      {
+        "name": "get_oracles",
+        "kind": "view",
+        "result": {
+          "serialization_type": "json",
+          "type_schema": {
+            "type": "array",
+            "items": {
+              "$ref": "#/definitions/AccountId"
+            }
+          }
+        }
       },
       {
         "name": "mint",
@@ -457,6 +467,21 @@
           "type_schema": {
             "$ref": "#/definitions/PromiseOrValueString"
           }
+        }
+      },
+      {
+        "name": "remove_oracle",
+        "kind": "call",
+        "params": {
+          "serialization_type": "json",
+          "args": [
+            {
+              "name": "account_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            }
+          ]
         }
       },
       {

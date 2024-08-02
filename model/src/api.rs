@@ -13,6 +13,8 @@ pub struct SweatBoosterContract<'a> {
 #[make_integration_version]
 pub trait AuthApi {
     fn add_oracle(&mut self, account_id: AccountId);
+    fn remove_oracle(&mut self, account_id: AccountId);
+    fn get_oracles(&self) -> Vec<AccountId>;
 }
 
 #[make_integration_version]
