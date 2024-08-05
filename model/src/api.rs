@@ -38,8 +38,9 @@ pub enum BoosterType {
 }
 
 #[near(serializers = [json])]
+#[derive(Clone)]
 pub struct BalanceBoosterData {
-    pub media_cid: String,
+    pub media: String,
     pub media_hash: Base64VecU8,
     pub denomination: U128,
 }

@@ -18,3 +18,5 @@ nitka = "0.5.0"
 nitka-proc = "0.5.0"
 
 sweat-booster-model = { path = "model" }
+
+regex = "1.10.6"

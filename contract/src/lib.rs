@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use near_contract_standards::non_fungible_token::{NonFungibleToken, NonFungibleTokenApproval, NonFungibleTokenEnumeration, NonFungibleTokenResolver, Token, TokenId};
+use near_contract_standards::non_fungible_token::{NonFungibleToken, NonFungibleTokenEnumeration, NonFungibleTokenResolver, Token, TokenId};
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata};
 use near_sdk::{AccountId, BorshStorageKey, env, ext_contract, Gas, near, NearToken, PanicOnDefault, Promise, PromiseError, PromiseOrValue, require, serde_json};
@@ -10,9 +10,11 @@ use serde_json::json;
 
 use sweat_booster_model::api::{AuthApi, BoosterType, BurnApi, MintApi, RedeemApi};
 
-mod util;
+use crate::BoosterExtra::BalanceBooster;
+
 pub mod auth;
 mod common;
+pub mod mint;
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
@@ -22,6 +24,11 @@ pub struct Contract {
     metadata: LazyOption<NFTContractMetadata>,
     last_id: u128,
     oracles: UnorderedSet<AccountId>,
+}
+
+#[near(serializers = [borsh, json])]
+pub enum BoosterExtra {
+    BalanceBooster(BalanceBoosterExtra),
 }
 
 #[near]
@@ -75,25 +82,6 @@ impl NonFungibleTokenCore for Contract {
 }
 
 #[near]
-impl MintApi for Contract {
-    fn mint(&mut self, receiver_id: AccountId, booster_type: BoosterType) -> Token {
-        self.assert_oracle();
-
-        let metadata = self.to_token(booster_type);
-
-        let result = self.tokens.internal_mint(
-            self.last_id.to_string(),
-            receiver_id,
-            Some(metadata),
-        );
-
-        self.last_id += 1;
-
-        result
-    }
-}
-
-#[near]
 impl RedeemApi for Contract {
     fn redeem(&mut self, token_id: TokenId) -> PromiseOrValue<U128> {
         let account_id = env::predecessor_account_id();
@@ -102,20 +90,13 @@ impl RedeemApi for Contract {
 
         let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
 
-        let mut metadata = token.metadata.expect("Token doesn't contain metadata");
-        let extra = metadata.extra.expect("Metadata doesn't contain extra");
-        let mut extra = serde_json::from_str::<BalanceBoosterExtra>(extra.as_str()).expect("Failed to parse extra");
-
+        let BalanceBooster(mut extra) = token.get_extra();
         require!(extra.is_redeemable, "Redeem is in progress");
 
         extra.is_redeemable = false;
         let amount = extra.denomination;
 
-        env::log_str(format!("Redeem {} to {}", amount, env::predecessor_account_id()).as_str());
-        env::log_str(format!("Token: {}", token_id.clone()).as_str());
-
-        metadata.extra = Some(serde_json::to_string(&extra).expect("Failed to serialize extra"));
-        self.tokens.token_metadata_by_id.as_mut().unwrap().insert(&token_id, &metadata);
+        self.update_extra(token, BalanceBooster(extra));
 
         Promise::new(self.ft_account_id.clone()).ft_transfer(&account_id, amount, None).then(
             ext_self::ext(env::current_account_id())
@@ -237,13 +218,10 @@ impl Callbacks for Contract {
 
         let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
 
-        let mut metadata = token.metadata.expect("Token doesn't contain metadata");
-        let extra = metadata.extra.expect("Metadata doesn't contain extra");
-        let mut extra = serde_json::from_str::<BalanceBoosterExtra>(extra.as_str()).expect("Failed to parse extra");
+        let BalanceBooster(mut extra) = token.get_extra();
         extra.is_redeemable = true;
 
-        metadata.extra = Some(serde_json::to_string(&extra).expect("Failed to serialize extra"));
-        self.tokens.token_metadata_by_id.as_mut().unwrap().insert(&token_id, &metadata);
+        self.update_extra(token, BalanceBooster(extra));
 
         PromiseOrValue::Value(0.into())
     }
@@ -271,7 +249,7 @@ impl NonFungibleTokenBurn for NonFungibleToken {
 }
 
 impl Contract {
-    fn to_token(&self, booster_type: BoosterType) -> TokenMetadata {
+    fn to_balance_booster_token(&self, booster_type: BoosterType) -> TokenMetadata {
         let BoosterType::BalanceBooster(data) = booster_type;
 
         let issued_at = env::block_timestamp_ms();
@@ -281,7 +259,7 @@ impl Contract {
         TokenMetadata {
             title: Some(format!("Voucher #{}", self.last_id)),
             description: Some(format!("{denomination_quot}.{denomination_rem} $SWEAT voucher").to_string()),
-            media: Some(data.media_cid),
+            media: Some(data.media),
             media_hash: Some(data.media_hash),
             copies: Some(1),
             issued_at: Some(issued_at.to_string()),
@@ -289,13 +267,32 @@ impl Contract {
             starts_at: None,
             updated_at: None,
             extra: Some(
-                serde_json::to_string(&BalanceBoosterExtra {
+                serde_json::to_string(&BalanceBooster(BalanceBoosterExtra {
                     denomination: data.denomination.0,
                     is_redeemable: true,
-                }).unwrap()
+                })).unwrap()
             ),
             reference: None,
             reference_hash: None,
         }
+    }
+
+    fn update_extra(&mut self, token: Token, extra: BoosterExtra) {
+        let mut metadata = token.metadata.expect("Token doesn't contain metadata");
+        metadata.extra = Some(serde_json::to_string(&extra).expect("Failed to serialize extra"));
+        self.tokens.token_metadata_by_id.as_mut().unwrap().insert(&token.token_id, &metadata);
+    }
+}
+
+trait ExtraExtractor {
+    fn get_extra(&self) -> BoosterExtra;
+}
+
+impl ExtraExtractor for Token {
+    fn get_extra(&self) -> BoosterExtra {
+        let metadata = self.metadata.as_ref().expect("Token doesn't contain metadata");
+        let extra = metadata.extra.as_ref().expect("Metadata doesn't contain extra");
+
+        serde_json::from_str::<BoosterExtra>(extra.as_str()).expect("Failed to parse extra")
     }
 }
