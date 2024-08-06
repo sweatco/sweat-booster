@@ -16,7 +16,6 @@ near-sdk = { workspace = true }
 near-contract-standards = { workspace = true }
 
 sweat-booster-model = { workspace = true }
-regex = "1.10.5"
 
 [dev-dependencies]
 near-sdk = { workspace = true, features = ["unit-testing"] }
