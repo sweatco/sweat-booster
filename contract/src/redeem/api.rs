@@ -5,8 +5,9 @@ use near_sdk::json_types::U128;
 
 use sweat_booster_model::api::RedeemApi;
 
-use crate::{BoosterExtra, Contract, ContractExt, ExtraExtractor, NonFungibleTokenBurn};
+use crate::{BoosterExtra, Contract, ContractExt, ExtraExtractor};
 use crate::BoosterExtra::BalanceBooster;
+use crate::burn::api::NonFungibleTokenBurn;
 
 #[near]
 impl RedeemApi for Contract {

@@ -15,6 +15,7 @@ pub mod auth;
 mod common;
 pub mod mint;
 pub mod redeem;
+mod burn;
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
@@ -82,16 +83,6 @@ impl NonFungibleTokenCore for Contract {
 }
 
 #[near]
-impl BurnApi for Contract {
-    fn burn(&mut self, owner_id: AccountId, token_id: TokenId) {
-        self.assert_oracle();
-        self.assert_owner(&owner_id, &token_id);
-
-        self.tokens.burn(token_id);
-    }
-}
-
-#[near]
 impl Contract {
     #[init]
     pub fn new(ft_account_id: AccountId, oracle: AccountId, base_uri: Option<String>) -> Self {
@@ -144,28 +135,6 @@ enum StorageKey {
 pub struct BalanceBoosterExtra {
     denomination: u128,
     is_redeemable: bool,
-}
-
-trait NonFungibleTokenBurn {
-    fn burn(&mut self, token_id: TokenId) -> TokenMetadata;
-}
-
-impl NonFungibleTokenBurn for NonFungibleToken {
-    fn burn(&mut self, token_id: TokenId) -> TokenMetadata {
-        let owner_id = self.owner_by_id.remove(&token_id).expect("Owner not found");
-
-        if let Some(approvals_by_id) = &mut self.approvals_by_id {
-            approvals_by_id.remove(&token_id);
-        }
-        if let Some(tokens_per_owner) = &mut self.tokens_per_owner {
-            let mut u = tokens_per_owner.remove(&owner_id).unwrap();
-            u.remove(&token_id);
-        }
-
-        self.token_metadata_by_id
-            .as_mut()
-            .and_then(|by_id| by_id.remove(&token_id)).unwrap()
-    }
 }
 
 impl Contract {
