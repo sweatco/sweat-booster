@@ -4,6 +4,7 @@ use std::{
     collections::BTreeMap,
     sync::{Mutex, MutexGuard},
 };
+
 use near_sdk::PromiseError;
 
 type ThreadId = String;
@@ -51,7 +52,7 @@ pub(crate) fn get_test_future_success() -> bool {
 pub(crate) fn get_test_future_result() -> Result<(), PromiseError> {
     if get_test_future_success() {
         Ok(())
-    }  else {
+    } else {
         Err(PromiseError::Failed)
     }
 }

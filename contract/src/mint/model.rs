@@ -1,11 +1,8 @@
-use near_contract_standards::non_fungible_token::metadata::TokenMetadata;
-use near_contract_standards::non_fungible_token::Token;
+use near_contract_standards::non_fungible_token::{metadata::TokenMetadata, Token};
 use near_sdk::{env, near, serde_json};
-
 use sweat_booster_model::api::BoosterType;
 
-use crate::Contract;
-use crate::mint::model::BoosterExtra::BalanceBooster;
+use crate::{mint::model::BoosterExtra::BalanceBooster, Contract};
 
 #[near(serializers = [borsh, json])]
 pub enum BoosterExtra {
@@ -40,7 +37,8 @@ impl Contract {
                 serde_json::to_string(&BalanceBooster(BalanceBoosterData {
                     denomination: data.denomination.0,
                     is_redeemable: true,
-                })).unwrap()
+                }))
+                .unwrap(),
             ),
             reference: None,
             reference_hash: None,
@@ -50,7 +48,11 @@ impl Contract {
     pub(crate) fn update_extra(&mut self, token: Token, extra: BoosterExtra) {
         let mut metadata = token.metadata.expect("Token doesn't contain metadata");
         metadata.extra = Some(serde_json::to_string(&extra).expect("Failed to serialize extra"));
-        self.tokens.token_metadata_by_id.as_mut().unwrap().insert(&token.token_id, &metadata);
+        self.tokens
+            .token_metadata_by_id
+            .as_mut()
+            .unwrap()
+            .insert(&token.token_id, &metadata);
     }
 }
 

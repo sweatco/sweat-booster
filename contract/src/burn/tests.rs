@@ -1,12 +1,16 @@
 #![cfg(test)]
 
-use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
-use near_contract_standards::non_fungible_token::NonFungibleTokenEnumeration;
-use near_sdk::json_types::{Base64VecU8, U128};
-use near_sdk::test_utils::test_env::{alice, bob};
+use near_contract_standards::non_fungible_token::{core::NonFungibleTokenCore, NonFungibleTokenEnumeration};
+use near_sdk::{
+    json_types::{Base64VecU8, U128},
+    test_utils::test_env::{alice, bob},
+};
 use sweat_booster_model::api::{BalanceBoosterData, BoosterType, BurnApi, MintApi};
-use crate::common::tests::{Context, oracle};
-use crate::mint::tests::DEPOSIT_FOR_MINTING;
+
+use crate::{
+    common::tests::{oracle, Context},
+    mint::tests::DEPOSIT_FOR_MINTING,
+};
 
 #[test]
 fn burn_token_by_oracle_for_valid_owner() {
@@ -20,12 +24,11 @@ fn burn_token_by_oracle_for_valid_owner() {
     };
 
     context.switch_account(oracle);
-    context.with_deposit_yocto(
-        DEPOSIT_FOR_MINTING,
-        |context| {
-            context.contract().mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
-        },
-    );
+    context.with_deposit_yocto(DEPOSIT_FOR_MINTING, |context| {
+        context
+            .contract()
+            .mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
+    });
 
     let alice_tokens = context.contract().nft_tokens_for_owner(alice(), None, None);
     assert_eq!(1, alice_tokens.len());
@@ -54,12 +57,11 @@ fn burn_token_by_oracle_for_invalid_owner() {
     };
 
     context.switch_account(oracle);
-    context.with_deposit_yocto(
-        DEPOSIT_FOR_MINTING,
-        |context| {
-            context.contract().mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
-        },
-    );
+    context.with_deposit_yocto(DEPOSIT_FOR_MINTING, |context| {
+        context
+            .contract()
+            .mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
+    });
 
     let alice_tokens = context.contract().nft_tokens_for_owner(alice(), None, None);
     assert_eq!(1, alice_tokens.len());
@@ -82,12 +84,11 @@ fn burn_token_not_by_oracle() {
     };
 
     context.switch_account(oracle);
-    context.with_deposit_yocto(
-        DEPOSIT_FOR_MINTING,
-        |context| {
-            context.contract().mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
-        },
-    );
+    context.with_deposit_yocto(DEPOSIT_FOR_MINTING, |context| {
+        context
+            .contract()
+            .mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
+    });
 
     let alice_tokens = context.contract().nft_tokens_for_owner(alice(), None, None);
     let token_to_burn = alice_tokens.first().unwrap();

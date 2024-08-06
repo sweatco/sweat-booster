@@ -1,15 +1,23 @@
 #![cfg(test)]
 
 use near_contract_standards::non_fungible_token::NonFungibleTokenEnumeration;
-use near_sdk::json_types::{Base64VecU8, U128};
-use near_sdk::PromiseOrValue;
-use near_sdk::test_utils::test_env::alice;
-
+use near_sdk::{
+    json_types::{Base64VecU8, U128},
+    test_utils::test_env::alice,
+    PromiseOrValue,
+};
 use sweat_booster_model::api::{BalanceBoosterData, BoosterType, MintApi, RedeemApi};
-use crate::common::test_data::set_test_future_success;
-use crate::common::tests::{Context, oracle};
-use crate::mint::model::{BoosterExtra, ExtraExtractor};
-use crate::mint::tests::DEPOSIT_FOR_MINTING;
+
+use crate::{
+    common::{
+        test_data::set_test_future_success,
+        tests::{oracle, Context},
+    },
+    mint::{
+        model::{BoosterExtra, ExtraExtractor},
+        tests::DEPOSIT_FOR_MINTING,
+    },
+};
 
 #[test]
 fn redeem_balance_booster_by_owner() {
@@ -23,12 +31,11 @@ fn redeem_balance_booster_by_owner() {
     };
 
     context.switch_account(oracle);
-    context.with_deposit_yocto(
-        DEPOSIT_FOR_MINTING,
-        |context| {
-            context.contract().mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
-        },
-    );
+    context.with_deposit_yocto(DEPOSIT_FOR_MINTING, |context| {
+        context
+            .contract()
+            .mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
+    });
 
     let alice_tokens = context.contract().nft_tokens_for_owner(alice(), None, None);
     assert_eq!(1, alice_tokens.len());
@@ -37,10 +44,14 @@ fn redeem_balance_booster_by_owner() {
 
     context.switch_account(alice());
     let redeemed_balance = context.contract().redeem(token_to_redeem.token_id.clone());
-    
+
     match redeemed_balance {
-        PromiseOrValue::Promise(_) => { panic!("Expected value") }
-        PromiseOrValue::Value(amount) => { assert_eq!(reference_booster_data.denomination, amount) }
+        PromiseOrValue::Promise(_) => {
+            panic!("Expected value")
+        }
+        PromiseOrValue::Value(amount) => {
+            assert_eq!(reference_booster_data.denomination, amount)
+        }
     }
 
     let alice_tokens = context.contract().nft_tokens_for_owner(alice(), None, None);
@@ -60,12 +71,11 @@ fn redeem_balance_booster_not_by_owner() {
     };
 
     context.switch_account(oracle.clone());
-    context.with_deposit_yocto(
-        DEPOSIT_FOR_MINTING,
-        |context| {
-            context.contract().mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
-        },
-    );
+    context.with_deposit_yocto(DEPOSIT_FOR_MINTING, |context| {
+        context
+            .contract()
+            .mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
+    });
 
     let alice_tokens = context.contract().nft_tokens_for_owner(alice(), None, None);
     assert_eq!(1, alice_tokens.len());
@@ -88,25 +98,28 @@ fn redeem_balance_booster_by_owner_with_failed_transfer() {
     };
 
     context.switch_account(oracle);
-    context.with_deposit_yocto(
-        DEPOSIT_FOR_MINTING,
-        |context| {
-            context.contract().mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
-        },
-    );
+    context.with_deposit_yocto(DEPOSIT_FOR_MINTING, |context| {
+        context
+            .contract()
+            .mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
+    });
 
     let alice_tokens = context.contract().nft_tokens_for_owner(alice(), None, None);
     assert_eq!(1, alice_tokens.len());
 
     let token_to_redeem = alice_tokens.first().unwrap();
-    
+
     context.switch_account(alice());
     set_test_future_success(false);
     let redeemed_balance = context.contract().redeem(token_to_redeem.token_id.clone());
-    
+
     match redeemed_balance {
-        PromiseOrValue::Promise(_) => { panic!("Expected value") }
-        PromiseOrValue::Value(amount) => { assert_eq!(0, amount.0) }
+        PromiseOrValue::Promise(_) => {
+            panic!("Expected value")
+        }
+        PromiseOrValue::Value(amount) => {
+            assert_eq!(0, amount.0)
+        }
     }
 
     let alice_tokens = context.contract().nft_tokens_for_owner(alice(), None, None);

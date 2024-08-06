@@ -1,13 +1,14 @@
-use near_contract_standards::non_fungible_token::metadata::NFTContractMetadata;
-use near_contract_standards::non_fungible_token::NonFungibleToken;
-use near_sdk::{AccountId, BorshStorageKey, env, near, PanicOnDefault};
-use near_sdk::collections::{LazyOption, UnorderedSet};
+use near_contract_standards::non_fungible_token::{metadata::NFTContractMetadata, NonFungibleToken};
+use near_sdk::{
+    collections::{LazyOption, UnorderedSet},
+    env, near, AccountId, BorshStorageKey, PanicOnDefault,
+};
 
 pub mod auth;
+pub mod burn;
 pub mod common;
 pub mod mint;
 pub mod redeem;
-pub mod burn;
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]

@@ -1,7 +1,7 @@
-use near_contract_standards::non_fungible_token::metadata::TokenMetadata;
-use near_contract_standards::non_fungible_token::{NonFungibleToken, TokenId};
-use near_sdk::{AccountId, near};
+use near_contract_standards::non_fungible_token::{metadata::TokenMetadata, NonFungibleToken, TokenId};
+use near_sdk::{near, AccountId};
 use sweat_booster_model::api::BurnApi;
+
 use crate::{Contract, ContractExt};
 
 #[near]
@@ -32,6 +32,7 @@ impl NonFungibleTokenBurn for NonFungibleToken {
 
         self.token_metadata_by_id
             .as_mut()
-            .and_then(|by_id| by_id.remove(&token_id)).unwrap()
+            .and_then(|by_id| by_id.remove(&token_id))
+            .expect("Token metadata not found")
     }
 }

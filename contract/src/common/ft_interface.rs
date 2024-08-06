@@ -15,7 +15,8 @@ impl FtTransfer for Promise {
             "receiver_id": receiver_id,
             "amount": amount.to_string(),
             "memo": memo.unwrap_or_default(),
-        })).expect("Failed to serialize arguments");
+        }))
+        .expect("Failed to serialize arguments");
 
         self.function_call(
             "ft_transfer".to_string(),

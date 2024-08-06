@@ -1,7 +1,7 @@
 use near_contract_standards::non_fungible_token::TokenId;
-use near_sdk::{AccountId, env, Gas, require};
-use crate::common::remaining_gas;
-use crate::Contract;
+use near_sdk::{env, require, AccountId, Gas};
+
+use crate::{common::remaining_gas, Contract};
 
 impl Contract {
     pub(crate) fn assert_oracle(&self) {
@@ -11,10 +11,17 @@ impl Contract {
     }
 
     pub(crate) fn assert_owner(&self, owner_id: &AccountId, token_id: &TokenId) {
-        require!(self.tokens.owner_by_id.get(token_id) == Some(owner_id.clone()), "Account doesnt own the token");
+        require!(
+            self.tokens.owner_by_id.get(token_id) == Some(owner_id.clone()),
+            "Account doesnt own the token"
+        );
     }
 }
 
 pub(crate) fn assert_enough_gas(required: Gas) {
-    require!(remaining_gas() >= required, "Not enough gas for further operations");
+    let remaining_gas = remaining_gas();
+    require!(
+        remaining_gas >= required,
+        format!("Not enough gas for further operations: {remaining_gas} gas left when {required} required"),
+    );
 }

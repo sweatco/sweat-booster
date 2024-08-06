@@ -2,12 +2,10 @@
 
 use std::{
     borrow::Borrow,
-    sync::{Arc, Mutex},
+    sync::{Arc, Mutex, MutexGuard},
 };
-use std::sync::MutexGuard;
 
-use near_sdk::{AccountId, NearToken, testing_env};
-use near_sdk::test_utils::VMContextBuilder;
+use near_sdk::{test_utils::VMContextBuilder, testing_env, AccountId, NearToken};
 
 use crate::Contract;
 

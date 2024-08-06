@@ -2,7 +2,8 @@
 
 use near_sdk::test_utils::test_env::{alice, bob};
 use sweat_booster_model::api::AuthApi;
-use crate::common::tests::{Context, oracle};
+
+use crate::common::tests::{oracle, Context};
 
 #[test]
 fn add_oracle_by_authorized_account() {
