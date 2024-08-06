@@ -6,9 +6,6 @@ install: ##@Miscellaneous Install dependencies
 	@npm i near-cli
 	@cargo build
 
-measure: ##@Miscellaneous Measure gas cost.
-	./scripts/measure.sh
-
 check: ##@Miscellaneous Run all checks.
 	make fmt && make lint && make build && make test && make int && make mutation
 
