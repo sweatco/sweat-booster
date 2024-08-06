@@ -16,9 +16,11 @@ near-sdk = { workspace = true }
 near-contract-standards = { workspace = true }
 
 sweat-booster-model = { workspace = true }
+regex = "1.10.5"
 
 [dev-dependencies]
 near-sdk = { workspace = true, features = ["unit-testing"] }
 near-workspaces = { workspace = true, features = ["unstable"] }
 tokio = { workspace = true, features = ["full"] }
 serde_json = { workspace = true }
+regex = { workspace = true }

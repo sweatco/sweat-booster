@@ -6,9 +6,6 @@ install: ##@Miscellaneous Install dependencies
 	@npm i near-cli
 	@cargo build
 
-measure: ##@Miscellaneous Measure gas cost.
-	./scripts/measure.sh
-
 check: ##@Miscellaneous Run all checks.
 	make fmt && make lint && make build && make test && make int && make mutation
 
@@ -34,7 +31,7 @@ cov: ##@Testing Run unit tests with coverage.
 
 test: ##@Testing Run unit tests.
 	cargo test --package sweat-booster-model --features=release-api --release && \
-	cargo test --package sweat_booster --release
+	cargo test --package sweat-booster --release
 
 integration: ##@Testing Run integration tests.
 	cargo test --package integration-tests

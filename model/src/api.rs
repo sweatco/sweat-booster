@@ -1,6 +1,8 @@
 use near_contract_standards::non_fungible_token::{Token, TokenId};
-use near_sdk::{AccountId, near, PromiseOrValue};
-use near_sdk::json_types::{Base64VecU8, U128};
+use near_sdk::{
+    json_types::{Base64VecU8, U128},
+    near, AccountId, PromiseOrValue,
+};
 #[cfg(feature = "integration-api")]
 use nitka::near_sdk;
 use nitka_proc::make_integration_version;
@@ -13,6 +15,8 @@ pub struct SweatBoosterContract<'a> {
 #[make_integration_version]
 pub trait AuthApi {
     fn add_oracle(&mut self, account_id: AccountId);
+    fn remove_oracle(&mut self, account_id: AccountId);
+    fn get_oracles(&self) -> Vec<AccountId>;
 }
 
 #[make_integration_version]
@@ -32,12 +36,13 @@ pub trait BurnApi {
 
 #[near(serializers = [json])]
 pub enum BoosterType {
-    BalanceBooster(BalanceBoosterData)
+    BalanceBooster(BalanceBoosterData),
 }
 
 #[near(serializers = [json])]
+#[derive(Clone)]
 pub struct BalanceBoosterData {
-    pub media_cid: String,
+    pub media: String,
     pub media_hash: Base64VecU8,
     pub denomination: U128,
 }
