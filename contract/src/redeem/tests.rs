@@ -8,7 +8,7 @@ use near_sdk::test_utils::test_env::alice;
 use sweat_booster_model::api::{BalanceBoosterData, BoosterType, MintApi, RedeemApi};
 use crate::common::test_data::set_test_future_success;
 use crate::common::tests::{Context, oracle};
-use crate::{BoosterExtra, ExtraExtractor};
+use crate::mint::model::{BoosterExtra, ExtraExtractor};
 use crate::mint::tests::DEPOSIT_FOR_MINTING;
 
 #[test]

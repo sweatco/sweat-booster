@@ -1,13 +1,16 @@
 #![cfg(test)]
 
 use std::panic::catch_unwind;
+
 use near_contract_standards::non_fungible_token::NonFungibleTokenEnumeration;
 use near_sdk::json_types::{Base64VecU8, U128};
 use near_sdk::test_utils::test_env::alice;
 use regex::Regex;
+
 use sweat_booster_model::api::{BalanceBoosterData, BoosterType, MintApi};
+
 use crate::common::tests::{Context, oracle};
-use crate::{BoosterExtra, ExtraExtractor};
+use crate::mint::model::{BoosterExtra, ExtraExtractor};
 
 pub(crate) const DEPOSIT_FOR_MINTING: u128 = 8_000_000_000_000_000_000_000;
 

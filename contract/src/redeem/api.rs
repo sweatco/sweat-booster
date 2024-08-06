@@ -5,9 +5,9 @@ use near_sdk::json_types::U128;
 
 use sweat_booster_model::api::RedeemApi;
 
-use crate::{BoosterExtra, Contract, ContractExt, ExtraExtractor};
-use crate::BoosterExtra::BalanceBooster;
+use crate::{Contract, ContractExt};
 use crate::burn::api::NonFungibleTokenBurn;
+use crate::mint::model::{BoosterExtra, ExtraExtractor};
 
 #[near]
 impl RedeemApi for Contract {
@@ -18,13 +18,13 @@ impl RedeemApi for Contract {
 
         let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
 
-        let BalanceBooster(mut extra) = token.get_extra();
+        let BoosterExtra::BalanceBooster(mut extra) = token.get_extra();
         require!(extra.is_redeemable, "Redeem is in progress");
 
         extra.is_redeemable = false;
         let amount = extra.denomination;
 
-        self.update_extra(token, BalanceBooster(extra));
+        self.update_extra(token, BoosterExtra::BalanceBooster(extra));
 
         self.transfer(&account_id, token_id, amount)
     }
@@ -43,17 +43,17 @@ impl Callbacks for Contract {
             let metadata = self.tokens.burn(token_id);
 
             let extra = metadata.extra.expect("Metadata doesn't contain extra");
-            let BalanceBooster(extra) = serde_json::from_str::<BoosterExtra>(extra.as_str()).expect("Failed to parse extra");
+            let BoosterExtra::BalanceBooster(extra) = serde_json::from_str::<BoosterExtra>(extra.as_str()).expect("Failed to parse extra");
 
             return PromiseOrValue::Value(extra.denomination.into());
         }
 
         let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
 
-        let BalanceBooster(mut extra) = token.get_extra();
+        let BoosterExtra::BalanceBooster(mut extra) = token.get_extra();
         extra.is_redeemable = true;
 
-        self.update_extra(token, BalanceBooster(extra));
+        self.update_extra(token, BoosterExtra::BalanceBooster(extra));
 
         PromiseOrValue::Value(0.into())
     }
