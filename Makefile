@@ -34,7 +34,7 @@ cov: ##@Testing Run unit tests with coverage.
 
 test: ##@Testing Run unit tests.
 	cargo test --package sweat-booster-model --features=release-api --release && \
-	cargo test --package sweat_booster --release
+	cargo test --package sweat-booster --release
 
 integration: ##@Testing Run integration tests.
 	cargo test --package integration-tests

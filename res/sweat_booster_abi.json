@@ -7,7 +7,7 @@
       "compiler": "rustc 1.80.0",
       "builder": "cargo-near 0.6.2"
     },
-    "wasm_hash": "4AqQWYpVFDHA4ug2ZVxpNkTVcB7YrCJG5U9L1AfULZtb"
+    "wasm_hash": "FRmSaqLoBSJpjxiD5q66dZquRs7zrQ5HDaeyAyg3FHub"
   },
   "body": {
     "functions": [
@@ -102,6 +102,12 @@
           "args": [
             {
               "name": "ft_account_id",
+              "type_schema": {
+                "$ref": "#/definitions/AccountId"
+              }
+            },
+            {
+              "name": "oracle",
               "type_schema": {
                 "$ref": "#/definitions/AccountId"
               }
@@ -513,14 +519,14 @@
           "type": "object",
           "required": [
             "denomination",
-            "media_cid",
+            "media",
             "media_hash"
           ],
           "properties": {
             "denomination": {
               "type": "string"
             },
-            "media_cid": {
+            "media": {
               "type": "string"
             },
             "media_hash": {

@@ -3,18 +3,18 @@ use std::collections::HashMap;
 use near_contract_standards::non_fungible_token::{NonFungibleToken, NonFungibleTokenEnumeration, NonFungibleTokenResolver, Token, TokenId};
 use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
 use near_contract_standards::non_fungible_token::metadata::{NFTContractMetadata, NonFungibleTokenMetadataProvider, TokenMetadata};
-use near_sdk::{AccountId, BorshStorageKey, env, ext_contract, Gas, near, NearToken, PanicOnDefault, Promise, PromiseError, PromiseOrValue, require, serde_json};
+use near_sdk::{AccountId, BorshStorageKey, env, near, PanicOnDefault, PromiseOrValue, serde_json};
 use near_sdk::collections::{LazyOption, UnorderedSet};
-use near_sdk::json_types::{Base64VecU8, U128};
-use serde_json::json;
+use near_sdk::json_types::U128;
 
-use sweat_booster_model::api::{AuthApi, BoosterType, BurnApi, MintApi, RedeemApi};
+use sweat_booster_model::api::{BoosterType, BurnApi, MintApi, RedeemApi};
 
 use crate::BoosterExtra::BalanceBooster;
 
 pub mod auth;
 mod common;
 pub mod mint;
+pub mod redeem;
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
@@ -78,31 +78,6 @@ impl NonFungibleTokenCore for Contract {
 
     fn nft_token(&self, token_id: TokenId) -> Option<Token> {
         self.tokens.nft_token(token_id)
-    }
-}
-
-#[near]
-impl RedeemApi for Contract {
-    fn redeem(&mut self, token_id: TokenId) -> PromiseOrValue<U128> {
-        let account_id = env::predecessor_account_id();
-
-        self.assert_owner(&account_id, &token_id);
-
-        let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
-
-        let BalanceBooster(mut extra) = token.get_extra();
-        require!(extra.is_redeemable, "Redeem is in progress");
-
-        extra.is_redeemable = false;
-        let amount = extra.denomination;
-
-        self.update_extra(token, BalanceBooster(extra));
-
-        Promise::new(self.ft_account_id.clone()).ft_transfer(&account_id, amount, None).then(
-            ext_self::ext(env::current_account_id())
-                .with_static_gas(Gas::from_tgas(10))
-                .on_redeem_transfer(token_id)
-        ).into()
     }
 }
 
@@ -171,68 +146,12 @@ pub struct BalanceBoosterExtra {
     is_redeemable: bool,
 }
 
-const GAS_FOR_FT_TRANSFER: Gas = Gas::from_gas(15_000_000_000_000);
-
-trait FtTransferPromise {
-    fn ft_transfer(self, receiver_id: &AccountId, amount: u128, memo: Option<String>) -> Promise;
-}
-
-impl FtTransferPromise for Promise {
-    fn ft_transfer(self, receiver_id: &AccountId, amount: u128, memo: Option<String>) -> Promise {
-        let args = serde_json::to_vec(&json!({
-            "receiver_id": receiver_id,
-            "amount": amount.to_string(),
-            "memo": memo.unwrap_or_default(),
-        }))
-            .expect("Failed to serialize arguments");
-
-        self.function_call(
-            "ft_transfer".to_string(),
-            args,
-            NearToken::from_yoctonear(1),
-            GAS_FOR_FT_TRANSFER,
-        )
-    }
-}
-
-#[ext_contract(ext_self)]
-trait Callbacks {
-    fn on_redeem_transfer(&mut self, #[callback_result] result: Result<(), PromiseError>, token_id: TokenId) -> PromiseOrValue<U128>;
-}
-
-#[near]
-impl Callbacks for Contract {
-    #[private]
-    fn on_redeem_transfer(&mut self, #[callback_result] result: Result<(), PromiseError>, token_id: TokenId) -> PromiseOrValue<U128> {
-        if result.is_ok() {
-            let metadata = self.tokens.token_metadata_by_id
-                .as_mut()
-                .and_then(|by_id| by_id.remove(&token_id)).unwrap();
-            self.tokens.owner_by_id.remove(&token_id);
-
-            let extra = metadata.extra.expect("Metadata doesn't contain extra");
-            let extra = serde_json::from_str::<BalanceBoosterExtra>(extra.as_str()).expect("Failed to parse extra");
-
-            return PromiseOrValue::Value(extra.denomination.into());
-        }
-
-        let token = self.tokens.nft_token(token_id.clone()).expect("Token not found");
-
-        let BalanceBooster(mut extra) = token.get_extra();
-        extra.is_redeemable = true;
-
-        self.update_extra(token, BalanceBooster(extra));
-
-        PromiseOrValue::Value(0.into())
-    }
-}
-
 trait NonFungibleTokenBurn {
-    fn burn(&mut self, token_id: TokenId);
+    fn burn(&mut self, token_id: TokenId) -> TokenMetadata;
 }
 
 impl NonFungibleTokenBurn for NonFungibleToken {
-    fn burn(&mut self, token_id: TokenId) {
+    fn burn(&mut self, token_id: TokenId) -> TokenMetadata {
         let owner_id = self.owner_by_id.remove(&token_id).expect("Owner not found");
 
         if let Some(approvals_by_id) = &mut self.approvals_by_id {
@@ -242,9 +161,10 @@ impl NonFungibleTokenBurn for NonFungibleToken {
             let mut u = tokens_per_owner.remove(&owner_id).unwrap();
             u.remove(&token_id);
         }
-        if let Some(token_metadata_by_id) = &mut self.token_metadata_by_id {
-            token_metadata_by_id.remove(&token_id);
-        }
+
+        self.token_metadata_by_id
+            .as_mut()
+            .and_then(|by_id| by_id.remove(&token_id)).unwrap()
     }
 }
 

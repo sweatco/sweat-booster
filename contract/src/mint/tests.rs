@@ -9,6 +9,8 @@ use sweat_booster_model::api::{BalanceBoosterData, BoosterType, MintApi};
 use crate::common::tests::{Context, oracle};
 use crate::{BoosterExtra, ExtraExtractor};
 
+pub(crate) const DEPOSIT_FOR_MINTING: u128 = 8_000_000_000_000_000_000_000;
+
 #[test]
 #[should_panic(expected = "Only oracle can call this method")]
 fn mint_by_unauthorized_account() {
@@ -61,7 +63,7 @@ fn mint_by_authorized_account() {
 
     context.switch_account(oracle);
     context.with_deposit_yocto(
-        8_000_000_000_000_000_000_000,
+        DEPOSIT_FOR_MINTING,
         |context| {
             context.contract().mint(alice(), BoosterType::BalanceBooster(reference_booster_data.clone()));
         },
