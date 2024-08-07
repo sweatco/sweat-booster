@@ -3,14 +3,13 @@ use near_sdk::{
     json_types::{Base64VecU8, U128},
     near, AccountId, PromiseOrValue,
 };
-use near_workspaces::Contract;
 #[cfg(feature = "integration-api")]
 use nitka::near_sdk;
 use nitka_proc::make_integration_version;
 
 #[cfg(feature = "integration-test")]
 pub struct SweatBoosterContract<'a> {
-    pub contract: &'a Contract,
+    pub contract: &'a near_workspaces::Contract,
 }
 
 /// An API for managing authorization of oracles for sensitive operations in the smart contract.

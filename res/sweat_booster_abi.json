@@ -7,7 +7,7 @@
       "compiler": "rustc 1.80.0",
       "builder": "cargo-near 0.6.2"
     },
-    "wasm_hash": "12kmZUuc6yAz4TWAZG41wdb9ZEPfvv4oqcqEp5zR98xV"
+    "wasm_hash": "FFKzVUo1fTocMLku5JLqdZD5ueGgxnmz4HJi4Du3m3UY"
   },
   "body": {
     "functions": [
@@ -516,6 +516,7 @@
           "type": "string"
         },
         "BalanceBoosterData": {
+          "description": "Struct representing the data required to create a balance booster token.",
           "type": "object",
           "required": [
             "denomination",
@@ -524,13 +525,20 @@
           ],
           "properties": {
             "denomination": {
+              "description": "The denomination of the balance booster.",
               "type": "string"
             },
             "media": {
+              "description": "A string representing the media associated with the balance booster. This can be either a full URL or a CID if a base URL is specified in the contract.",
               "type": "string"
             },
             "media_hash": {
-              "$ref": "#/definitions/Base64VecU8"
+              "description": "SHA256 hash of content referenced by the `media` field.",
+              "allOf": [
+                {
+                  "$ref": "#/definitions/Base64VecU8"
+                }
+              ]
             }
           }
         },
