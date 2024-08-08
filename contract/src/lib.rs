@@ -9,6 +9,8 @@ pub mod burn;
 pub mod common;
 pub mod mint;
 pub mod redeem;
+pub mod init;
+pub mod config;
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
@@ -49,12 +51,6 @@ impl Contract {
             last_id: 0,
             oracles,
         }
-    }
-
-    pub fn set_base_uri(&mut self, base_uri: String) {
-        let mut metadata = self.metadata.get().expect("No metadata found");
-        metadata.base_uri = Some(base_uri);
-        self.metadata.replace(&metadata);
     }
 }
 

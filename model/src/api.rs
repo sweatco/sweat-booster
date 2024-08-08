@@ -12,6 +12,38 @@ pub struct SweatBoosterContract<'a> {
     pub contract: &'a near_workspaces::Contract,
 }
 
+/// An API for initializing the contract.
+#[make_integration_version]
+pub trait InitApi {
+    /// A method to initialize the contract.
+    ///
+    /// # Arguments
+    ///
+    /// * `ft_account_id` - An `AccountId` representing the account address of the fungible
+    ///    token contract that this smart contract will interact with.
+    /// * `oracle` - An `AccountId` representing the account that can perform sensitive operations.
+    /// * `base_uri` - An `Option<String>` representing the URI for the gateway providing access to tokens media.
+    ///
+    /// # Returns
+    ///
+    /// Returns a new instance of the contract.
+    fn new(ft_account_id: AccountId, oracle: AccountId, base_uri: Option<String>) -> Self;
+}
+/// An API for configuring the contract.
+#[make_integration_version]
+pub trait ConfigApi {
+    /// Sets the URI for the gateway providing access to tokens media.
+    ///
+    /// # Arguments
+    ///
+    /// * `base_uri` - A `String` representing the new URI to be set.
+    ///
+    /// # Panics
+    ///
+    /// Panics if called by someone other than the oracle.
+    fn set_base_uri(&mut self, base_uri: String);
+}
+
 /// An API for managing authorization of oracles for sensitive operations in the smart contract.
 ///
 /// This API allows managing of oracles, which are accounts authorized to perform
