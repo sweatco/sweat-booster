@@ -1,7 +1,9 @@
+use near_sdk::near;
 use sweat_booster_model::api::ConfigApi;
 
-use crate::Contract;
+use crate::{Contract, ContractExt};
 
+#[near]
 impl ConfigApi for Contract {
     fn set_base_uri(&mut self, base_uri: String) {
         self.assert_oracle();

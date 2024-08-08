@@ -7,60 +7,27 @@ use near_sdk::{
 pub mod auth;
 pub mod burn;
 pub mod common;
+pub mod config;
+pub mod init;
 pub mod mint;
 pub mod redeem;
-pub mod init;
-pub mod config;
 
 #[near(contract_state)]
 #[derive(PanicOnDefault)]
 pub struct Contract {
+    /// An `AccountId` representing the account address of the fungible
+    /// token contract that this smart contract will interact with.
     ft_account_id: AccountId,
+
+    /// Implementation of the non-fungible token standard.
     tokens: NonFungibleToken,
+
+    /// Metadata for the NFT contract.
     metadata: LazyOption<NFTContractMetadata>,
+
+    /// A counter providing incremental IDs for NFTs.
     last_id: u128,
+
+    /// IDs of accounts authorized to perform sensitive operations on the contract.
     oracles: UnorderedSet<AccountId>,
-}
-
-#[near]
-impl Contract {
-    #[init]
-    pub fn new(ft_account_id: AccountId, oracle: AccountId, base_uri: Option<String>) -> Self {
-        let contract_metadata = NFTContractMetadata {
-            spec: "nft-2.0.0".to_string(),
-            name: "Booster".to_string(),
-            symbol: "BSTR".to_string(),
-            icon: None,
-            base_uri,
-            reference: None,
-            reference_hash: None,
-        };
-        let mut oracles = UnorderedSet::new(StorageKey::Oracles);
-        oracles.insert(&oracle);
-
-        Self {
-            ft_account_id,
-            tokens: NonFungibleToken::new(
-                StorageKey::OwnerById,
-                env::predecessor_account_id(),
-                Some(StorageKey::TokenMetadata),
-                Some(StorageKey::Enumeration),
-                Some(StorageKey::Approval),
-            ),
-            metadata: LazyOption::new(StorageKey::ContractMetadata, Some(&contract_metadata)),
-            last_id: 0,
-            oracles,
-        }
-    }
-}
-
-#[near]
-#[derive(BorshStorageKey)]
-enum StorageKey {
-    OwnerById,
-    TokenMetadata,
-    Enumeration,
-    Approval,
-    ContractMetadata,
-    Oracles,
 }
