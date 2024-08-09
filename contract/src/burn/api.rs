@@ -1,8 +1,11 @@
 use near_contract_standards::non_fungible_token::{metadata::TokenMetadata, NonFungibleToken, TokenId};
-use near_sdk::{near, AccountId};
-use sweat_booster_model::api::BurnApi;
+use near_sdk::{near, serde_json, AccountId};
+use sweat_booster_model::{
+    api::BurnApi,
+    event::{emit, BurnData, EventKind},
+};
 
-use crate::{Contract, ContractExt};
+use crate::{mint::model::BoosterExtra, Contract, ContractExt};
 
 #[near]
 impl BurnApi for Contract {
@@ -10,7 +13,15 @@ impl BurnApi for Contract {
         self.assert_oracle();
         self.assert_owner(&owner_id, &token_id);
 
-        self.tokens.burn(token_id);
+        let metadata = self.tokens.burn(token_id.clone());
+        let BoosterExtra::BalanceBooster(extra) =
+            serde_json::from_str::<BoosterExtra>(metadata.extra.expect("Token has no extra").as_str())
+                .expect("Failed to parse extra");
+
+        emit(EventKind::Burn(BurnData {
+            token_id,
+            denomination: extra.denomination.into(),
+        }));
     }
 }
 

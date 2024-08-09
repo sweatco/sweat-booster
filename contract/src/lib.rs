@@ -1,7 +1,7 @@
 use near_contract_standards::non_fungible_token::{metadata::NFTContractMetadata, NonFungibleToken};
 use near_sdk::{
-    collections::{LazyOption, UnorderedSet},
-    env, near, AccountId, BorshStorageKey, PanicOnDefault,
+    AccountId,
+    collections::{LazyOption, UnorderedSet}, near, PanicOnDefault,
 };
 
 pub mod auth;

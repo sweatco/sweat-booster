@@ -1,6 +1,9 @@
 use near_contract_standards::non_fungible_token::{core::NonFungibleTokenCore, TokenId};
 use near_sdk::{env, ext_contract, json_types::U128, near, require, serde_json, PromiseError, PromiseOrValue};
-use sweat_booster_model::api::RedeemApi;
+use sweat_booster_model::{
+    api::RedeemApi,
+    event::{emit, EventKind, RedeemData},
+};
 
 use crate::{
     burn::api::NonFungibleTokenBurn,
@@ -47,11 +50,16 @@ impl Callbacks for Contract {
         token_id: TokenId,
     ) -> PromiseOrValue<U128> {
         if result.is_ok() {
-            let metadata = self.tokens.burn(token_id);
+            let metadata = self.tokens.burn(token_id.clone());
 
             let extra = metadata.extra.expect("Metadata doesn't contain extra");
             let BoosterExtra::BalanceBooster(extra) =
                 serde_json::from_str::<BoosterExtra>(extra.as_str()).expect("Failed to parse extra");
+
+            emit(EventKind::Redeem(RedeemData {
+                token_id,
+                denomination: extra.denomination.into(),
+            }));
 
             return PromiseOrValue::Value(extra.denomination.into());
         }
