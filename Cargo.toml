@@ -17,6 +17,7 @@ anyhow = "1.0.75"
 nitka = "0.5.0"
 nitka-proc = "0.5.0"
 
-sweat-booster-model = { path = "model" }
-
 regex = "1.10.6"
+
+sweat-booster-model = { path = "model" }
+sweat-model = { git = "https://github.com/sweatco/sweat-near", rev = "537ef7d0aa3bf58d87b77a1c9660b2d0299b6c00" }
