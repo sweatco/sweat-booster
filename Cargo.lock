@@ -2187,7 +2187,7 @@ dependencies = [
  "near-contract-standards 5.2.1",
  "near-sdk 5.2.1",
  "near-workspaces",
- "nitka 0.5.0",
+ "nitka 0.4.0",
  "sweat-booster-model",
  "sweat-model",
  "tokio",
@@ -3492,40 +3492,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "nitka"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66754ad535a4e57991ef1638b11724efd7d6beab9a454b52eb8d95ed7d62af49"
-dependencies = [
- "anyhow",
- "base64 0.22.1",
- "cfg-if 1.0.0",
- "fake",
- "futures",
- "near-sdk 5.2.1",
- "near-workspaces",
- "nitka-proc 0.5.0",
- "serde",
- "serde_json",
- "tokio",
-]
-
-[[package]]
 name = "nitka-proc"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "98132f2b33daa48f52a5df408379bd5f3a364ceb3e50fce0cbbee38adc16ebc6"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.72",
-]
-
-[[package]]
-name = "nitka-proc"
-version = "0.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "455cb0cad8d49c8d6c24d548e79d0210ca360c69abca62234986a274a554ff70"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -5110,8 +5080,8 @@ dependencies = [
  "near-contract-standards 5.2.1",
  "near-sdk 5.2.1",
  "near-workspaces",
- "nitka 0.5.0",
- "nitka-proc 0.5.0",
+ "nitka 0.4.0",
+ "nitka-proc",
 ]
 
 [[package]]
@@ -5124,7 +5094,7 @@ dependencies = [
  "near-self-update",
  "near-workspaces",
  "nitka 0.4.0",
- "nitka-proc 0.4.0",
+ "nitka-proc",
 ]
 
 [[package]]
