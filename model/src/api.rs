@@ -1,7 +1,6 @@
-use crate::booster::BoosterType;
 use near_contract_standards::non_fungible_token::{Token, TokenId};
 use near_sdk::{
-    json_types::{U128},
+    json_types::{Base64VecU8, U128},
     AccountId,
 };
 #[cfg(feature = "integration-api")]
@@ -103,12 +102,21 @@ pub trait MintApi {
     /// # Arguments
     ///
     /// * `receiver_id` - An `AccountId` representing the receiver of the new token.
-    /// * `booster_type` - A `BoosterType` specifying the type of booster.
+    /// * `denomination` – The denomination of the balance booster.
+    /// * `media` – A string representing the media associated with the balance booster.
+    //    This can be either a full URL or a CID if a base URL is specified in the contract.
+    /// * `media_hash` – SHA256 hash of content referenced by the `media` field.
     ///
     /// # Returns
     ///
     /// Returns a `Token` representing the newly minted booster token.
-    fn mint(&mut self, receiver_id: AccountId, booster_type: BoosterType) -> Token;
+    fn mint_balance_booster(
+        &mut self,
+        receiver_id: AccountId,
+        denomination: U128,
+        media: String,
+        media_hash: Base64VecU8,
+    ) -> Token;
 }
 
 /// An API for redeeming booster tokens.

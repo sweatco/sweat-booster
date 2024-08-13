@@ -1,3 +1,3 @@
 pub mod api;
 pub mod event;
-pub mod booster;
+pub mod model;

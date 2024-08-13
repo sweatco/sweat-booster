@@ -3,13 +3,10 @@ use near_sdk::{env, ext_contract, json_types::U128, near, require, serde_json, P
 use sweat_booster_model::{
     api::RedeemApi,
     event::{emit, EventKind, RedeemData},
+    model::BoosterExtra,
 };
 
-use crate::{
-    burn::api::NonFungibleTokenBurn,
-    mint::model::{BoosterExtra, ExtraExtractor},
-    Contract, ContractExt,
-};
+use crate::{burn::api::NonFungibleTokenBurn, mint::model::ExtraExtractor, Contract, ContractExt};
 
 #[near]
 impl RedeemApi for Contract {
