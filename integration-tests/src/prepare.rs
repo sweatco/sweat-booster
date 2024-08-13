@@ -1,7 +1,6 @@
 use anyhow::Result;
-use near_sdk::json_types::U128;
 use near_workspaces::Account;
-use nitka::misc::ToNear;
+use nitka::{misc::ToNear, near_sdk::json_types::U128};
 use sweat_booster_model::api::{InitApiIntegration, SweatBoosterContract};
 use sweat_model::{FungibleTokenCoreIntegration, StorageManagementIntegration, SweatApiIntegration, SweatContract};
 

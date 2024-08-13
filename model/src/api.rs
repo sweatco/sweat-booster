@@ -1,5 +1,9 @@
+use crate::booster::BoosterType;
 use near_contract_standards::non_fungible_token::{Token, TokenId};
-use near_sdk::{json_types::{Base64VecU8, U128}, serde::{Deserialize, Serialize}, AccountId, NearSchema};
+use near_sdk::{
+    json_types::{U128},
+    AccountId,
+};
 #[cfg(feature = "integration-api")]
 use nitka::near_sdk;
 use nitka_proc::make_integration_version;
@@ -146,25 +150,4 @@ pub trait BurnApi {
     ///
     /// Panics if the token does not exist or if it does not belong to the owner.
     fn burn(&mut self, owner_id: AccountId, token_id: TokenId);
-}
-
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, NearSchema)]
-#[serde(crate = "near_sdk::serde")]
-pub enum BoosterType {
-    BalanceBooster(BalanceBoosterData),
-}
-
-/// Struct representing the data required to create a balance booster token.
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, NearSchema)]
-#[serde(crate = "near_sdk::serde")]
-pub struct BalanceBoosterData {
-    /// A string representing the media associated with the balance booster.
-    /// This can be either a full URL or a CID if a base URL is specified in the contract.
-    pub media: String,
-
-    /// SHA256 hash of content referenced by the `media` field.
-    pub media_hash: Base64VecU8,
-
-    /// The denomination of the balance booster.
-    pub denomination: U128,
 }
