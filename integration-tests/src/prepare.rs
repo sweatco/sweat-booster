@@ -1,8 +1,9 @@
 use anyhow::Result;
+use near_sdk::json_types::U128;
 use near_workspaces::Account;
-use nitka::{misc::ToNear, near_sdk::json_types::U128};
-use sweat_model::{FungibleTokenCoreIntegration, StorageManagementIntegration, SweatApiIntegration, SweatContract};
+use nitka::misc::ToNear;
 use sweat_booster_model::api::{InitApiIntegration, SweatBoosterContract};
+use sweat_model::{FungibleTokenCoreIntegration, StorageManagementIntegration, SweatApiIntegration, SweatContract};
 
 pub type Context = nitka::context::Context<near_workspaces::network::Sandbox>;
 
@@ -62,7 +63,10 @@ pub(crate) async fn prepare_contract() -> Result<Context> {
 
     context
         .ft_contract()
-        .tge_mint(&context.sweat_booster().contract.as_account().to_near(), U128(100_000_000))
+        .tge_mint(
+            &context.sweat_booster().contract.as_account().to_near(),
+            U128(100_000_000),
+        )
         .await?;
 
     context

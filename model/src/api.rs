@@ -1,8 +1,5 @@
 use near_contract_standards::non_fungible_token::{Token, TokenId};
-use near_sdk::{
-    json_types::{Base64VecU8, U128},
-    near, AccountId, PromiseOrValue,
-};
+use near_sdk::{json_types::{Base64VecU8, U128}, serde::{Deserialize, Serialize}, AccountId, NearSchema};
 #[cfg(feature = "integration-api")]
 use nitka::near_sdk;
 use nitka_proc::make_integration_version;
@@ -128,7 +125,7 @@ pub trait RedeemApi {
     ///
     /// Returns a `PromiseOrValue<U128>` representing the amount of redeemed tokens.
     /// If the redeem operation fails on `ft_transfer`, it returns 0.
-    fn redeem(&mut self, token_id: TokenId) -> PromiseOrValue<U128>;
+    fn redeem(&mut self, token_id: TokenId) -> ::near_sdk::PromiseOrValue<U128>;
 }
 
 /// An API for burning booster tokens, i.e. moving it out of circulation.
@@ -151,14 +148,15 @@ pub trait BurnApi {
     fn burn(&mut self, owner_id: AccountId, token_id: TokenId);
 }
 
-#[near(serializers = [json])]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, NearSchema)]
+#[serde(crate = "near_sdk::serde")]
 pub enum BoosterType {
     BalanceBooster(BalanceBoosterData),
 }
 
 /// Struct representing the data required to create a balance booster token.
-#[near(serializers = [json])]
-#[derive(Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, NearSchema)]
+#[serde(crate = "near_sdk::serde")]
 pub struct BalanceBoosterData {
     /// A string representing the media associated with the balance booster.
     /// This can be either a full URL or a CID if a base URL is specified in the contract.

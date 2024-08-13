@@ -7,6 +7,7 @@ use std::{
 
 use near_sdk::{test_utils::VMContextBuilder, testing_env, AccountId, NearToken};
 use sweat_booster_model::api::InitApi;
+
 use crate::Contract;
 
 pub(crate) fn oracle() -> AccountId {
