@@ -43,7 +43,7 @@ fn burn_token_by_oracle_for_valid_owner() {
 }
 
 #[test]
-#[should_panic(expected = "Account doesnt own the token")]
+#[should_panic(expected = "Account doesn't own the token")]
 fn burn_token_by_oracle_for_invalid_owner() {
     let oracle = oracle();
     let mut context = Context::new(&oracle);

@@ -57,7 +57,7 @@ fn redeem_balance_booster_by_owner() {
 }
 
 #[test]
-#[should_panic(expected = "Account doesnt own the token")]
+#[should_panic(expected = "Account doesn't own the token")]
 fn redeem_balance_booster_not_by_owner() {
     let oracle = oracle();
     let mut context = Context::new(&oracle);

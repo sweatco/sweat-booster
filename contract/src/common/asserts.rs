@@ -13,7 +13,7 @@ impl Contract {
     pub(crate) fn assert_owner(&self, owner_id: &AccountId, token_id: &TokenId) {
         require!(
             self.tokens.owner_by_id.get(token_id) == Some(owner_id.clone()),
-            "Account doesnt own the token"
+            "Account doesn't own the token"
         );
     }
 }

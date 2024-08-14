@@ -1,5 +1,4 @@
 use anyhow::Result;
-use near_sdk::NearToken;
 use near_workspaces::Account;
 use nitka::{misc::ToNear, near_sdk::json_types::U128};
 use sweat_booster_model::api::{InitApiIntegration, SweatBoosterContract};
@@ -40,10 +39,25 @@ impl IntegrationContext for Context {
 }
 
 pub async fn prepare_contract() -> Result<Context> {
+    prepare_contract_internal(None, None, None).await
+}
+
+pub async fn prepare_contract_with_balances(
+    ft_contract_balance: u128,
+    alice_balance: u128,
+    manager_balance: u128,
+) -> Result<Context> {
+    prepare_contract_internal(Some(ft_contract_balance), Some(alice_balance), Some(manager_balance)).await
+}
+
+async fn prepare_contract_internal(
+    ft_contract_balance: Option<u128>,
+    alice_balance: Option<u128>,
+    manager_balance: Option<u128>,
+) -> Result<Context> {
     let mut context = Context::new(&[FT_CONTRACT, SWEAT_BOOSTER], true, "build-integration".into()).await?;
 
     let alice = context.alice().await?;
-    let bob = context.account("bob").await?;
     let manager = context.manager().await?;
 
     context.ft_contract().new(".u.sweat.testnet".to_string().into()).await?;
@@ -65,7 +79,7 @@ pub async fn prepare_contract() -> Result<Context> {
         .ft_contract()
         .tge_mint(
             &context.sweat_booster().contract.as_account().to_near(),
-            U128(100_000_000),
+            U128(ft_contract_balance.unwrap_or(100_000_000)),
         )
         .await?;
 
@@ -75,19 +89,11 @@ pub async fn prepare_contract() -> Result<Context> {
         .await?;
     context
         .ft_contract()
-        .tge_mint(&alice.to_near(), U128(100_000_000))
+        .tge_mint(&alice.to_near(), U128(alice_balance.unwrap_or(100_000_000)))
         .await?;
     context
         .ft_contract()
-        .storage_deposit(bob.to_near().into(), None)
-        .await?;
-    context
-        .ft_contract()
-        .tge_mint(&bob.to_near(), U128(100_000_000))
-        .await?;
-    context
-        .ft_contract()
-        .tge_mint(&manager.to_near(), U128(100_000_000))
+        .tge_mint(&manager.to_near(), U128(manager_balance.unwrap_or(100_000_000)))
         .await?;
 
     Ok(context)
