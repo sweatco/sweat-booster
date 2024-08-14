@@ -1,4 +1,5 @@
 use anyhow::Result;
+use near_sdk::NearToken;
 use near_workspaces::Account;
 use nitka::{misc::ToNear, near_sdk::json_types::U128};
 use sweat_booster_model::api::{InitApiIntegration, SweatBoosterContract};
@@ -38,7 +39,7 @@ impl IntegrationContext for Context {
     }
 }
 
-pub(crate) async fn prepare_contract() -> Result<Context> {
+pub async fn prepare_contract() -> Result<Context> {
     let mut context = Context::new(&[FT_CONTRACT, SWEAT_BOOSTER], true, "build-integration".into()).await?;
 
     let alice = context.alice().await?;
