@@ -4,4 +4,4 @@ set -eox pipefail
 echo ">> Mutation tests"
 
 cargo install --locked cargo-mutants
-cargo mutants -p sweat_booster -- --release
+cargo mutants -p sweat-booster -- --release

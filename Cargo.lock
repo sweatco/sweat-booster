@@ -1335,6 +1335,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f0bc8fbe9441c17c9f46f75dfe27fa1ddb6c68a461ccaed0481419219d4f10d3"
 
 [[package]]
+name = "dotenv"
+version = "0.15.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "77c90badedccf4105eca100756a0b1289e191f6fcbdadd3cee1d2f614f97da8f"
+
+[[package]]
 name = "dunce"
 version = "1.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2178,10 +2184,12 @@ name = "integration-tests"
 version = "1.0.0"
 dependencies = [
  "anyhow",
+ "near-contract-standards 5.2.1",
+ "near-sdk 5.2.1",
  "near-workspaces",
- "nitka",
- "serde_json",
+ "nitka 0.4.0",
  "sweat-booster-model",
+ "sweat-model",
  "tokio",
 ]
 
@@ -2748,11 +2756,19 @@ dependencies = [
 
 [[package]]
 name = "near-contract-standards"
+version = "5.1.0"
+source = "git+https://github.com/sweatco/near-sdk-rs?rev=d5e975e3b224b5758745ab46c25d586a8e0db473#d5e975e3b224b5758745ab46c25d586a8e0db473"
+dependencies = [
+ "near-sdk 5.1.0",
+]
+
+[[package]]
+name = "near-contract-standards"
 version = "5.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9b7682ed5a41e8818518808b2e263b5f482ae7b9b37fff1df5383beb888bbed8"
 dependencies = [
- "near-sdk",
+ "near-sdk 5.2.1",
 ]
 
 [[package]]
@@ -3124,6 +3140,25 @@ dependencies = [
 
 [[package]]
 name = "near-sdk"
+version = "5.1.0"
+source = "git+https://github.com/sweatco/near-sdk-rs?rev=d5e975e3b224b5758745ab46c25d586a8e0db473#d5e975e3b224b5758745ab46c25d586a8e0db473"
+dependencies = [
+ "base64 0.21.7",
+ "borsh",
+ "bs58 0.5.1",
+ "near-account-id",
+ "near-gas",
+ "near-sdk-macros 5.1.0",
+ "near-sys 0.2.1",
+ "near-token",
+ "once_cell",
+ "serde",
+ "serde_json",
+ "wee_alloc",
+]
+
+[[package]]
+name = "near-sdk"
 version = "5.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "951ac0ba9c90e4ed6e927914d2ecee3d8ae2d74e794656b5ca42a992bd370863"
@@ -3137,14 +3172,30 @@ dependencies = [
  "near-parameters 0.23.0",
  "near-primitives 0.23.0",
  "near-primitives-core 0.23.0",
- "near-sdk-macros",
- "near-sys",
+ "near-sdk-macros 5.2.1",
+ "near-sys 0.2.2",
  "near-token",
  "near-vm-runner 0.23.0",
  "once_cell",
  "serde",
  "serde_json",
  "wee_alloc",
+]
+
+[[package]]
+name = "near-sdk-macros"
+version = "5.1.0"
+source = "git+https://github.com/sweatco/near-sdk-rs?rev=d5e975e3b224b5758745ab46c25d586a8e0db473#d5e975e3b224b5758745ab46c25d586a8e0db473"
+dependencies = [
+ "Inflector",
+ "darling",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "serde_json",
+ "strum 0.26.3",
+ "strum_macros 0.26.4",
+ "syn 2.0.72",
 ]
 
 [[package]]
@@ -3162,6 +3213,17 @@ dependencies = [
  "strum 0.26.3",
  "strum_macros 0.26.4",
  "syn 2.0.72",
+]
+
+[[package]]
+name = "near-self-update"
+version = "0.1.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b12d976c41c2c60d0d39fffb16edf08beae461cf6aee3c78c9e6807ebc32cf52"
+dependencies = [
+ "anyhow",
+ "near-workspaces",
+ "nitka 0.2.2",
 ]
 
 [[package]]
@@ -3195,6 +3257,11 @@ checksum = "29e1897481272eb144328abd51ca9f59b5b558e7a6dc6e2177c8c9bb18fbd818"
 
 [[package]]
 name = "near-sys"
+version = "0.2.1"
+source = "git+https://github.com/sweatco/near-sdk-rs?rev=d5e975e3b224b5758745ab46c25d586a8e0db473#d5e975e3b224b5758745ab46c25d586a8e0db473"
+
+[[package]]
+name = "near-sys"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "dbf4ca5c805cb78700e10e43484902d8da05f25788db277999d209568aaf4c8e"
@@ -3220,6 +3287,38 @@ dependencies = [
  "borsh",
  "interactive-clap",
  "serde",
+]
+
+[[package]]
+name = "near-units"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "97a2b77f295d398589eeee51ad0887905ef1734fb12b45cb6d77bd7e401988b9"
+dependencies = [
+ "near-units-core",
+ "near-units-macro",
+]
+
+[[package]]
+name = "near-units-core"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89aa2a7985de87a08ca35f28abd8d00f0f901e704257e6e029aadef981386bc6"
+dependencies = [
+ "num-format",
+ "regex",
+]
+
+[[package]]
+name = "near-units-macro"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "89ab45d066220846f9bd5c21e9ab88c47c892edd36f962ada78bf8308523171a"
+dependencies = [
+ "near-units-core",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -3362,18 +3461,31 @@ dependencies = [
 
 [[package]]
 name = "nitka"
-version = "0.5.0"
+version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "66754ad535a4e57991ef1638b11724efd7d6beab9a454b52eb8d95ed7d62af49"
+checksum = "f1b01a4eb588f738a3e5cf72d08308eab105bf6e326c81a5cc55a96f45febcfa"
+dependencies = [
+ "anyhow",
+ "dotenv",
+ "fake",
+ "futures",
+ "near-sdk 5.2.1",
+ "near-units",
+ "near-workspaces",
+ "tokio",
+]
+
+[[package]]
+name = "nitka"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a456e97a688ae7643c470172edef4b8159e0ac9c3e69a4af7fc0bb7096c02e2f"
 dependencies = [
  "anyhow",
  "base64 0.22.1",
- "cfg-if 1.0.0",
  "fake",
  "futures",
- "near-sdk",
  "near-workspaces",
- "nitka-proc",
  "serde",
  "serde_json",
  "tokio",
@@ -3381,9 +3493,9 @@ dependencies = [
 
 [[package]]
 name = "nitka-proc"
-version = "0.5.0"
+version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "455cb0cad8d49c8d6c24d548e79d0210ca360c69abca62234986a274a554ff70"
+checksum = "98132f2b33daa48f52a5df408379bd5f3a364ceb3e50fce0cbbee38adc16ebc6"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -3484,6 +3596,16 @@ name = "num-conv"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "51d515d32fb182ee37cda2ccdcb92950d6a3c2893aa280e540671c2cd0f3b1d9"
+
+[[package]]
+name = "num-format"
+version = "0.4.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a652d9771a63711fd3c3deb670acfbe5c30a4072e664d7a3bf5a9e1056ac72c3"
+dependencies = [
+ "arrayvec",
+ "itoa",
+]
 
 [[package]]
 name = "num-integer"
@@ -4942,8 +5064,8 @@ checksum = "13c2bddecc57b384dee18652358fb23172facb8a2c51ccc10d74c157bdea3292"
 name = "sweat-booster"
 version = "0.1.0"
 dependencies = [
- "near-contract-standards",
- "near-sdk",
+ "near-contract-standards 5.2.1",
+ "near-sdk 5.2.1",
  "near-workspaces",
  "regex",
  "serde_json",
@@ -4955,10 +5077,23 @@ dependencies = [
 name = "sweat-booster-model"
 version = "2.1.0"
 dependencies = [
- "near-contract-standards",
- "near-sdk",
+ "near-contract-standards 5.2.1",
+ "near-sdk 5.2.1",
  "near-workspaces",
- "nitka",
+ "nitka 0.4.0",
+ "nitka-proc",
+]
+
+[[package]]
+name = "sweat-model"
+version = "0.1.0"
+source = "git+https://github.com/sweatco/sweat-near?rev=537ef7d0aa3bf58d87b77a1c9660b2d0299b6c00#537ef7d0aa3bf58d87b77a1c9660b2d0299b6c00"
+dependencies = [
+ "near-contract-standards 5.1.0",
+ "near-sdk 5.1.0",
+ "near-self-update",
+ "near-workspaces",
+ "nitka 0.4.0",
  "nitka-proc",
 ]
 

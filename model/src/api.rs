@@ -1,7 +1,7 @@
 use near_contract_standards::non_fungible_token::{Token, TokenId};
 use near_sdk::{
     json_types::{Base64VecU8, U128},
-    near, AccountId, PromiseOrValue,
+    AccountId,
 };
 #[cfg(feature = "integration-api")]
 use nitka::near_sdk;
@@ -102,12 +102,21 @@ pub trait MintApi {
     /// # Arguments
     ///
     /// * `receiver_id` - An `AccountId` representing the receiver of the new token.
-    /// * `booster_type` - A `BoosterType` specifying the type of booster.
+    /// * `denomination` – The denomination of the balance booster.
+    /// * `media` – A string representing the media associated with the balance booster.
+    //    This can be either a full URL or a CID if a base URL is specified in the contract.
+    /// * `media_hash` – SHA256 hash of content referenced by the `media` field.
     ///
     /// # Returns
     ///
     /// Returns a `Token` representing the newly minted booster token.
-    fn mint(&mut self, receiver_id: AccountId, booster_type: BoosterType) -> Token;
+    fn mint_balance_booster(
+        &mut self,
+        receiver_id: AccountId,
+        denomination: U128,
+        media: String,
+        media_hash: Base64VecU8,
+    ) -> Token;
 }
 
 /// An API for redeeming booster tokens.
@@ -128,7 +137,7 @@ pub trait RedeemApi {
     ///
     /// Returns a `PromiseOrValue<U128>` representing the amount of redeemed tokens.
     /// If the redeem operation fails on `ft_transfer`, it returns 0.
-    fn redeem(&mut self, token_id: TokenId) -> PromiseOrValue<U128>;
+    fn redeem(&mut self, token_id: TokenId) -> ::near_sdk::PromiseOrValue<U128>;
 }
 
 /// An API for burning booster tokens, i.e. moving it out of circulation.
@@ -149,24 +158,4 @@ pub trait BurnApi {
     ///
     /// Panics if the token does not exist or if it does not belong to the owner.
     fn burn(&mut self, owner_id: AccountId, token_id: TokenId);
-}
-
-#[near(serializers = [json])]
-pub enum BoosterType {
-    BalanceBooster(BalanceBoosterData),
-}
-
-/// Struct representing the data required to create a balance booster token.
-#[near(serializers = [json])]
-#[derive(Clone)]
-pub struct BalanceBoosterData {
-    /// A string representing the media associated with the balance booster.
-    /// This can be either a full URL or a CID if a base URL is specified in the contract.
-    pub media: String,
-
-    /// SHA256 hash of content referenced by the `media` field.
-    pub media_hash: Base64VecU8,
-
-    /// The denomination of the balance booster.
-    pub denomination: U128,
 }

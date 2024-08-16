@@ -3,9 +3,10 @@ use near_sdk::{near, serde_json, AccountId};
 use sweat_booster_model::{
     api::BurnApi,
     event::{emit, BurnData, EventKind},
+    model::BoosterExtra,
 };
 
-use crate::{mint::model::BoosterExtra, Contract, ContractExt};
+use crate::{Contract, ContractExt};
 
 #[near]
 impl BurnApi for Contract {

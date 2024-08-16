@@ -11,6 +11,12 @@ edition = "2021"
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+[features]
+default = ["release"]
+release = ["sweat-booster-model/release-api"]
+integration-test = ["sweat-booster-model/release-api", "sweat-booster-model/integration-methods"]
+integration-api = ["sweat-booster-model/integration-api"]
+
 [dependencies]
 near-sdk = { workspace = true }
 near-contract-standards = { workspace = true }

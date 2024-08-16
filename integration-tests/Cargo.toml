@@ -8,10 +8,12 @@ edition = "2021"
 name = "integration_tests"
 
 [dependencies]
-tokio = { workspace = true, features = ["full"] }
-anyhow = { workspace = true }
-serde_json = { workspace = true }
-
 sweat-booster-model = { workspace = true, features = ["integration-test", "integration-methods", "integration-api"] }
+sweat-model = { workspace = true, features = ["integration-api"] }
 nitka = { workspace = true }
+
 near-workspaces = { workspace = true }
+near-sdk = { workspace = true }
+near-contract-standards = { workspace = true }
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["full"] }

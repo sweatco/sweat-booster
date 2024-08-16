@@ -1,33 +1,25 @@
 use near_contract_standards::non_fungible_token::{metadata::TokenMetadata, Token};
-use near_sdk::{env, near, serde_json};
-use sweat_booster_model::api::BoosterType;
+use near_sdk::{env, json_types::Base64VecU8, serde_json};
+use sweat_booster_model::model::{BalanceBoosterData, BoosterExtra, BoosterExtra::BalanceBooster};
 
-use crate::{mint::model::BoosterExtra::BalanceBooster, Contract};
-
-#[near(serializers = [borsh, json])]
-pub enum BoosterExtra {
-    BalanceBooster(BalanceBoosterData),
-}
-
-#[near(serializers = [borsh, json])]
-pub struct BalanceBoosterData {
-    pub denomination: u128,
-    pub is_redeemable: bool,
-}
+use crate::Contract;
 
 impl Contract {
-    pub(crate) fn to_balance_booster_token(&self, booster_type: BoosterType) -> TokenMetadata {
-        let BoosterType::BalanceBooster(data) = booster_type;
-
+    pub(crate) fn to_balance_booster_token(
+        &self,
+        denomination: u128,
+        media: String,
+        media_hash: Base64VecU8,
+    ) -> TokenMetadata {
         let issued_at = env::block_timestamp_ms();
-        let denomination_quot = data.denomination.0 / u128::pow(10, 18);
-        let denomination_rem = data.denomination.0 % u128::pow(10, 18);
+        let denomination_quot = denomination / u128::pow(10, 18);
+        let denomination_rem = denomination % u128::pow(10, 18);
 
         TokenMetadata {
             title: Some(format!("Voucher #{}", self.last_id)),
             description: Some(format!("{denomination_quot}.{denomination_rem} $SWEAT voucher").to_string()),
-            media: Some(data.media),
-            media_hash: Some(data.media_hash),
+            media: Some(media),
+            media_hash: Some(media_hash),
             copies: Some(1),
             issued_at: Some(issued_at.to_string()),
             expires_at: None,
@@ -35,7 +27,7 @@ impl Contract {
             updated_at: None,
             extra: Some(
                 serde_json::to_string(&BalanceBooster(BalanceBoosterData {
-                    denomination: data.denomination.0,
+                    denomination,
                     is_redeemable: true,
                 }))
                 .unwrap(),
