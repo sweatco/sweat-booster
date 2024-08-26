@@ -37,6 +37,7 @@ impl NonFungibleTokenMetadataProvider for Contract {
 
 #[near]
 impl NonFungibleTokenResolver for Contract {
+    #[private]
     fn nft_resolve_transfer(
         &mut self,
         previous_owner_id: AccountId,
