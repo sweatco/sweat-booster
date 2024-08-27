@@ -60,6 +60,7 @@ impl NonFungibleTokenCore for Contract {
         approval_id: Option<u64>,
         memo: Option<String>,
     ) {
+        self.assert_is_redeemable(&token_id);
         self.tokens.nft_transfer(receiver_id, token_id, approval_id, memo)
     }
 
@@ -72,6 +73,7 @@ impl NonFungibleTokenCore for Contract {
         memo: Option<String>,
         msg: String,
     ) -> PromiseOrValue<bool> {
+        self.assert_is_redeemable(&token_id);
         self.tokens
             .nft_transfer_call(receiver_id, token_id, approval_id, memo, msg)
     }
