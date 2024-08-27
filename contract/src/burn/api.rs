@@ -37,9 +37,17 @@ impl NonFungibleTokenBurn for NonFungibleToken {
         if let Some(approvals_by_id) = &mut self.approvals_by_id {
             approvals_by_id.remove(&token_id);
         }
+
         if let Some(tokens_per_owner) = &mut self.tokens_per_owner {
-            let mut u = tokens_per_owner.remove(&owner_id).unwrap();
-            u.remove(&token_id);
+            let mut owner_tokens = tokens_per_owner
+                .get(&owner_id)
+                .expect("Unable to access tokens per owner.");
+            owner_tokens.remove(&token_id);
+            if owner_tokens.is_empty() {
+                tokens_per_owner.remove(&owner_id);
+            } else {
+                tokens_per_owner.insert(&owner_id, &owner_tokens);
+            }
         }
 
         self.token_metadata_by_id
