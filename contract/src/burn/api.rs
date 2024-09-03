@@ -1,5 +1,5 @@
 use near_contract_standards::non_fungible_token::{metadata::TokenMetadata, NonFungibleToken, TokenId};
-use near_sdk::{near, serde_json, AccountId};
+use near_sdk::{near, require, serde_json, AccountId};
 use sweat_booster_model::{
     api::BurnApi,
     event::{emit, BurnData, EventKind},
@@ -18,6 +18,8 @@ impl BurnApi for Contract {
         let BoosterExtra::BalanceBooster(extra) =
             serde_json::from_str::<BoosterExtra>(metadata.extra.expect("Token has no extra").as_str())
                 .expect("Failed to parse extra");
+
+        require!(extra.is_redeemable, "Redeem is in progress");
 
         emit(EventKind::Burn(BurnData {
             token_id,
