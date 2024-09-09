@@ -8,4 +8,4 @@ if [ $? -ne 0 ]; then
 fi
 
 cd contract
-cargo near deploy
+cargo near deploy --no-docker --no-locked
