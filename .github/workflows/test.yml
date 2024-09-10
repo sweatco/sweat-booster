@@ -10,7 +10,10 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - run: make fmt-check
+      - run: |
+          rustup toolchain install nightly
+          rustup component add --toolchain nightly-x86_64-unknown-linux-gnu rustfmt
+          make fmt-check
 
   code-linter:
     name: Code Linter
