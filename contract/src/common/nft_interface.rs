@@ -61,7 +61,7 @@ impl NonFungibleTokenCore for Contract {
         memo: Option<String>,
     ) {
         self.assert_is_redeemable(&token_id);
-        self.tokens.nft_transfer(receiver_id, token_id, approval_id, memo)
+        self.tokens.nft_transfer(receiver_id, token_id, approval_id, memo);
     }
 
     #[payable]
