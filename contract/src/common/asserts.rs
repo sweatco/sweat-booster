@@ -1,9 +1,8 @@
-use near_contract_standards::non_fungible_token::core::NonFungibleTokenCore;
-use near_contract_standards::non_fungible_token::TokenId;
+use near_contract_standards::non_fungible_token::{core::NonFungibleTokenCore, TokenId};
 use near_sdk::{env, require, AccountId, Gas};
 use sweat_booster_model::model::BoosterExtra;
-use crate::{common::remaining_gas, Contract};
-use crate::mint::model::ExtraExtractor;
+
+use crate::{common::remaining_gas, mint::model::ExtraExtractor, Contract};
 
 impl Contract {
     pub(crate) fn assert_oracle(&self) {
@@ -22,7 +21,7 @@ impl Contract {
     pub(crate) fn assert_is_redeemable(&self, token_id: &TokenId) {
         let token = self.nft_token(token_id.clone()).expect("Token doesn't exist");
         let BoosterExtra::BalanceBooster(data) = token.get_extra();
-        
+
         require!(data.is_redeemable, "Token is not redeemable");
     }
 }

@@ -6,4 +6,4 @@ echo ">> Building contract"
 rustup target add wasm32-unknown-unknown
 
 cd contract
-cargo near build --out-dir ../res
+cargo near build --no-locked --no-docker --out-dir ../res

@@ -30,7 +30,7 @@ impl RedeemApi for Contract {
 }
 
 #[ext_contract(ext_self)]
-trait Callbacks {
+pub trait Callbacks {
     fn on_redeem_transfer(
         &mut self,
         #[callback_result] result: Result<(), PromiseError>,

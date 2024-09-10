@@ -41,6 +41,9 @@ int: integration ##@Testing Shorthand for `integration`
 fmt: ##@Chores Format the code using rustfmt nightly.
 	cargo +nightly fmt --all
 
+fmt-check: ##@Chores Check the code format using rustfmt nightly.
+	cargo +nightly fmt --all --check
+
 lint: ##@Chores Run lint checks with Clippy.
 	./scripts/lint.sh
 

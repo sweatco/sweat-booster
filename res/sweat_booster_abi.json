@@ -5,9 +5,9 @@
     "version": "0.1.0",
     "build": {
       "compiler": "rustc 1.80.0",
-      "builder": "cargo-near 0.6.2"
+      "builder": "cargo-near 0.8.2"
     },
-    "wasm_hash": "BMUs1Ld5sdgM993ZCGNbjEqmCa9JGnkNVB9BgxSb8vpo"
+    "wasm_hash": "GkHQC9qTBJgotpfSHfSxRk64rwUM2WQwujCZkACwMGZm"
   },
   "body": {
     "functions": [

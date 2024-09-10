@@ -29,15 +29,15 @@ struct Event {
     standard: &'static str,
     version: &'static str,
     #[serde(flatten)]
-    event_kind: EventKind,
+    kind: EventKind,
 }
 
 impl From<EventKind> for Event {
-    fn from(event_kind: EventKind) -> Self {
+    fn from(kind: EventKind) -> Self {
         Self {
             standard: PACKAGE_NAME,
             version: VERSION,
-            event_kind,
+            kind,
         }
     }
 }
